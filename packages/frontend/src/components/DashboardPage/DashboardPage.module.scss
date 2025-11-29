@@ -1,0 +1,87 @@
+.dashboardPage__page {
+  height: 100%;
+
+  :global {
+    .pf-v6-c-page__main {
+      height: 85vh;
+    }
+  }
+}
+
+.dashboardPage__mastheadBrand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dashboardPage__mastheadTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--pf-v6-global--Color--100);
+  line-height: 1;
+}
+
+.dashboardPage__pageSection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.dashboardPage__container {
+  max-width: 600px;
+  width: 100%;
+  padding: 2rem;
+}
+
+.dashboardPage__card {
+  text-align: center;
+}
+
+.dashboardPage__cardBody {
+  padding: 3rem 2rem;
+}
+
+.dashboardPage__counter {
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--pf-v6-global--Color--200);
+}
+
+.dashboardPage__counterIcon {
+  margin-right: 0.5rem;
+}
+
+.dashboardPage__otpDisplay {
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: 0.5rem;
+  font-family: monospace;
+  color: var(--pf-v6-global--primary-color--100);
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--pf-v6-global--BackgroundColor--200);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--pf-v6-global--BackgroundColor--300);
+  }
+}
+
+.dashboardPage__copyButton {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.dashboardPage__markAsUsedButton {
+  width: 100%;
+}
+
+.dashboardPage__infoText {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--pf-v6-global--Color--200);
+}

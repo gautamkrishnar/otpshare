@@ -1,0 +1,47 @@
+.loginPage {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--pf-v6-global--BackgroundColor--100);
+}
+
+.loginPage__themeToggleWrapper {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+}
+
+.loginPage__container {
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem;
+}
+
+.loginPage__card {
+  width: 100%;
+}
+
+.loginPage__cardBody {
+  padding: 2.5rem;
+}
+
+.loginPage__logoWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.loginPage__title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--pf-v6-global--Color--100);
+  margin: 0;
+}
+
+.loginPage__alert {
+  margin-bottom: 1rem;
+}

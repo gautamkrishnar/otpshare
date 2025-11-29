@@ -1,0 +1,321 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Response } from 'express';
+import type { AuthRequest } from '../middleware/auth';
+import { OTPModel } from '../models/OTP';
+import { UserModel } from '../models/User';
+import { ParserFactory, VendorType } from '../parsers';
+
+export const importOTPs = async (req: AuthRequest, res: Response) => {
+  try {
+    const { codes } = req.body;
+
+    if (!codes || !Array.isArray(codes) || codes.length === 0) {
+      return res.status(400).json({ error: 'Codes array is required and must not be empty' });
+    }
+
+    const trimmedCodes = codes.map((code) => String(code).trim()).filter((code) => code.length > 0);
+
+    if (trimmedCodes.length === 0) {
+      return res.status(400).json({ error: 'No valid codes provided' });
+    }
+
+    const count = OTPModel.createBulk(trimmedCodes);
+
+    res.json({
+      message: `${count} OTPs imported successfully`,
+      count,
+    });
+  } catch (error) {
+    console.error('Import OTPs error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const importOTPsFromFile = async (req: AuthRequest, res: Response) => {
+  try {
+    const { vendorType } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'File is required' });
+    }
+
+    if (!vendorType || !Object.values(VendorType).includes(vendorType as VendorType)) {
+      return res.status(400).json({ error: 'Valid vendor type is required' });
+    }
+
+    const parser = ParserFactory.getParser(vendorType as VendorType);
+    const codes = await parser.parse(file.buffer);
+
+    if (codes.length === 0) {
+      return res.status(400).json({ error: 'No valid codes found in the file' });
+    }
+
+    const count = OTPModel.createBulk(codes);
+
+    res.json({
+      message: `${count} OTPs imported successfully`,
+      count,
+    });
+  } catch (error) {
+    console.error('Import OTPs from file error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getAllOTPs = async (req: AuthRequest, res: Response) => {
+  try {
+    const { status, search } = req.query;
+
+    const filters: { status?: 'used' | 'unused'; search?: string } = {};
+
+    if (status === 'used' || status === 'unused') {
+      filters.status = status;
+    }
+
+    if (typeof search === 'string' && search.trim()) {
+      filters.search = search.trim();
+    }
+
+    const otps = OTPModel.findAll(filters);
+    const stats = OTPModel.getStats();
+
+    res.json({
+      otps,
+      stats,
+    });
+  } catch (error) {
+    console.error('Get all OTPs error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const createUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const { username, password, role } = req.body;
+
+    if (!username || !password || !role) {
+      return res.status(400).json({ error: 'Username, password, and role are required' });
+    }
+
+    if (role !== 'admin' && role !== 'user') {
+      return res.status(400).json({ error: 'Role must be either "admin" or "user"' });
+    }
+
+    const existingUser = UserModel.findByUsername(username);
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const user = await UserModel.create({ username, password, role });
+
+    res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        created_at: user.created_at,
+      },
+    });
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getUsers = async (_req: AuthRequest, res: Response) => {
+  try {
+    const users = UserModel.findAll();
+
+    const sanitizedUsers = users.map((user) => ({
+      id: user.id,
+      username: user.username,
+      role: user.role,
+      created_at: user.created_at,
+      updated_at: user.updated_at,
+    }));
+
+    res.json({ users: sanitizedUsers });
+  } catch (error) {
+    console.error('Get users error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updateUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = Number.parseInt(req.params.id);
+    const { username, password, role } = req.body;
+
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    if (role && role !== 'admin' && role !== 'user') {
+      return res.status(400).json({ error: 'Role must be either "admin" or "user"' });
+    }
+
+    const updateData: { username?: string; password?: string; role?: 'admin' | 'user' } = {};
+
+    if (username) updateData.username = username;
+    if (password) updateData.password = password;
+    if (role) updateData.role = role;
+
+    const updatedUser = await UserModel.update(userId, updateData);
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      message: 'User updated successfully',
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        updated_at: updatedUser.updated_at,
+      },
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = Number.parseInt(req.params.id);
+
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    const user = UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (user.role === 'admin') {
+      const allUsers = UserModel.findAll();
+      const adminCount = allUsers.filter((u) => u.role === 'admin').length;
+
+      if (adminCount <= 1) {
+        return res.status(400).json({ error: 'Cannot delete the last admin user' });
+      }
+    }
+
+    const deleted = UserModel.delete(userId);
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const deleteOTP = async (req: AuthRequest, res: Response) => {
+  try {
+    const otpId = Number.parseInt(req.params.id);
+
+    if (Number.isNaN(otpId)) {
+      return res.status(400).json({ error: 'Invalid OTP ID' });
+    }
+
+    const otp = OTPModel.findById(otpId);
+    if (!otp) {
+      return res.status(404).json({ error: 'OTP not found' });
+    }
+
+    const deleted = OTPModel.delete(otpId);
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'OTP not found' });
+    }
+
+    res.json({ message: 'OTP deleted successfully' });
+  } catch (error) {
+    console.error('Delete OTP error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const downloadBackup = async (_req: AuthRequest, res: Response) => {
+  try {
+    const dbPath = process.env.DATABASE_PATH || './data/otpmanager.db';
+    const absolutePath = path.resolve(dbPath);
+
+    if (!fs.existsSync(absolutePath)) {
+      return res.status(404).json({ error: 'Database file not found' });
+    }
+
+    const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
+    const filename = `otpmanager-backup-${timestamp}.db`;
+
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    const fileStream = fs.createReadStream(absolutePath);
+    fileStream.pipe(res);
+  } catch (error) {
+    console.error('Download backup error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const deleteBulkOTPs = async (req: AuthRequest, res: Response) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'IDs array is required and must not be empty' });
+    }
+
+    const validIds = ids.filter((id) => typeof id === 'number' && !Number.isNaN(id));
+
+    if (validIds.length === 0) {
+      return res.status(400).json({ error: 'No valid IDs provided' });
+    }
+
+    const deletedCount = OTPModel.deleteBulk(validIds);
+
+    res.json({
+      message: `${deletedCount} OTP(s) deleted successfully`,
+      count: deletedCount,
+    });
+  } catch (error) {
+    console.error('Bulk delete OTPs error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const markBulkOTPsAsUsed = async (req: AuthRequest, res: Response) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'IDs array is required and must not be empty' });
+    }
+
+    const validIds = ids.filter((id) => typeof id === 'number' && !Number.isNaN(id));
+
+    if (validIds.length === 0) {
+      return res.status(400).json({ error: 'No valid IDs provided' });
+    }
+
+    const markedCount = OTPModel.markBulkAsUsed(validIds, req.user!.userId);
+
+    res.json({
+      message: `${markedCount} OTP(s) marked as used successfully`,
+      count: markedCount,
+    });
+  } catch (error) {
+    console.error('Bulk mark OTPs as used error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

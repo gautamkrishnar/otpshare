@@ -1,0 +1,27 @@
+{
+  "name": "otpshare-monorepo",
+  "version": "1.0.0",
+  "description": "OTP Manager - Monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "packageManager": "yarn@4.0.2",
+  "scripts": {
+    "dev": "concurrently --names 'backend,frontend' -c 'blue,magenta' 'yarn workspace @otpshare/backend dev' 'yarn workspace @otpshare/frontend dev'",
+    "build": "yarn workspaces foreach -Apt run build",
+    "start": "concurrently --names 'backend,frontend' -c 'blue,magenta' 'yarn workspace @otpshare/backend start' 'yarn workspace @otpshare/frontend start'",
+    "setup": "yarn workspace @otpshare/backend setup",
+    "lint": "yarn workspaces foreach -Apt run lint",
+    "format": "yarn workspaces foreach -Apt run format",
+    "check": "yarn workspaces foreach -Apt run check",
+    "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist .yarn/cache .yarn/install-state.gz"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}
