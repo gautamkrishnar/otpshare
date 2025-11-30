@@ -2,10 +2,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { initializeDatabase } from './config/database';
 import adminRoutes from './routes/adminRoutes';
 import authRoutes from './routes/authRoutes';
 import otpRoutes from './routes/otpRoutes';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -15,8 +19,6 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 app.use(cors());
 app.use(express.json());
-
-initializeDatabase();
 
 // API routes
 app.use('/api/auth', authRoutes);
@@ -39,9 +41,15 @@ if (isProduction) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  if (isProduction) {
-    console.log('Serving frontend static files');
-  }
-});
+const startServer = async () => {
+  await initializeDatabase();
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    if (isProduction) {
+      console.log('Serving frontend static files');
+    }
+  });
+};
+
+startServer();

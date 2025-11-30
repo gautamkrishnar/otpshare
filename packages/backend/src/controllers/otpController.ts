@@ -4,9 +4,9 @@ import { OTPModel } from '../models/OTP';
 
 export const getOTPs = async (_req: AuthRequest, res: Response) => {
   try {
-    const available = OTPModel.findAvailable(1);
-    const recentlyUsed = OTPModel.findRecentlyUsed(7);
-    const stats = OTPModel.getStats();
+    const available = await OTPModel.findAvailable(1);
+    const recentlyUsed = await OTPModel.findRecentlyUsed(7);
+    const stats = await OTPModel.getStats();
 
     res.json({
       available,
@@ -32,7 +32,7 @@ export const markOTPAsUsed = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const updatedOTP = OTPModel.markAsUsed(otpId, userId);
+    const updatedOTP = await OTPModel.markAsUsed(otpId, userId);
 
     if (!updatedOTP) {
       return res.status(400).json({ error: 'OTP not found or already used' });

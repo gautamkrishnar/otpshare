@@ -20,7 +20,7 @@ export const importOTPs = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'No valid codes provided' });
     }
 
-    const count = OTPModel.createBulk(trimmedCodes);
+    const count = await OTPModel.createBulk(trimmedCodes, req.user!.userId);
 
     res.json({
       message: `${count} OTPs imported successfully`,
@@ -52,7 +52,7 @@ export const importOTPsFromFile = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'No valid codes found in the file' });
     }
 
-    const count = OTPModel.createBulk(codes);
+    const count = await OTPModel.createBulk(codes, req.user!.userId);
 
     res.json({
       message: `${count} OTPs imported successfully`,
@@ -78,8 +78,8 @@ export const getAllOTPs = async (req: AuthRequest, res: Response) => {
       filters.search = search.trim();
     }
 
-    const otps = OTPModel.findAll(filters);
-    const stats = OTPModel.getStats();
+    const otps = await OTPModel.findAll(filters);
+    const stats = await OTPModel.getStats();
 
     res.json({
       otps,
@@ -103,7 +103,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Role must be either "admin" or "user"' });
     }
 
-    const existingUser = UserModel.findByUsername(username);
+    const existingUser = await UserModel.findByUsername(username);
     if (existingUser) {
       return res.status(400).json({ error: 'Username already exists' });
     }
@@ -127,7 +127,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
 export const getUsers = async (_req: AuthRequest, res: Response) => {
   try {
-    const users = UserModel.findAll();
+    const users = await UserModel.findAll();
 
     const sanitizedUsers = users.map((user) => ({
       id: user.id,
@@ -192,13 +192,13 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Invalid user ID' });
     }
 
-    const user = UserModel.findById(userId);
+    const user = await UserModel.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
     if (user.role === 'admin') {
-      const allUsers = UserModel.findAll();
+      const allUsers = await UserModel.findAll();
       const adminCount = allUsers.filter((u) => u.role === 'admin').length;
 
       if (adminCount <= 1) {
@@ -206,7 +206,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    const deleted = UserModel.delete(userId);
+    const deleted = await UserModel.delete(userId);
 
     if (!deleted) {
       return res.status(404).json({ error: 'User not found' });
@@ -227,12 +227,12 @@ export const deleteOTP = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Invalid OTP ID' });
     }
 
-    const otp = OTPModel.findById(otpId);
+    const otp = await OTPModel.findById(otpId);
     if (!otp) {
       return res.status(404).json({ error: 'OTP not found' });
     }
 
-    const deleted = OTPModel.delete(otpId);
+    const deleted = await OTPModel.delete(otpId);
 
     if (!deleted) {
       return res.status(404).json({ error: 'OTP not found' });
@@ -282,7 +282,7 @@ export const deleteBulkOTPs = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'No valid IDs provided' });
     }
 
-    const deletedCount = OTPModel.deleteBulk(validIds);
+    const deletedCount = await OTPModel.deleteBulk(validIds);
 
     res.json({
       message: `${deletedCount} OTP(s) deleted successfully`,
@@ -308,7 +308,7 @@ export const markBulkOTPsAsUsed = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'No valid IDs provided' });
     }
 
-    const markedCount = OTPModel.markBulkAsUsed(validIds, req.user!.userId);
+    const markedCount = await OTPModel.markBulkAsUsed(validIds, req.user!.userId);
 
     res.json({
       message: `${markedCount} OTP(s) marked as used successfully`,

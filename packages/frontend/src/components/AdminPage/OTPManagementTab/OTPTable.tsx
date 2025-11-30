@@ -1,6 +1,7 @@
 import { Button, Checkbox, Label } from '@patternfly/react-core';
 import { TrashIcon } from '@patternfly/react-icons';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { format } from 'timeago.js';
 import type { OTPWithUser } from '../../../types';
 
 interface OTPTableProps {
@@ -15,9 +16,10 @@ interface OTPTableProps {
   isDeleting: boolean;
 }
 
-const formatDate = (dateString: string | null) => {
+const formatDateWithUser = (dateString: string | null, username?: string) => {
   if (!dateString) return '-';
-  return new Date(dateString).toLocaleString();
+  const timeAgo = format(dateString);
+  return username ? `${timeAgo} by ${username}` : timeAgo;
 };
 
 export const OTPTable = ({
@@ -44,9 +46,8 @@ export const OTPTable = ({
         </Th>
         <Th>Code</Th>
         <Th>Status</Th>
-        <Th>Created At</Th>
-        <Th>Used At</Th>
-        <Th>Used By</Th>
+        <Th>Created</Th>
+        <Th>Used</Th>
         <Th>Actions</Th>
       </Tr>
     </Thead>
@@ -67,9 +68,8 @@ export const OTPTable = ({
               {otp.status}
             </Label>
           </Td>
-          <Td>{formatDate(otp.created_at)}</Td>
-          <Td>{formatDate(otp.used_at)}</Td>
-          <Td>{otp.username || '-'}</Td>
+          <Td>{formatDateWithUser(otp.created_at, otp.createdByUsername)}</Td>
+          <Td>{formatDateWithUser(otp.used_at, otp.usedByUsername)}</Td>
           <Td>
             {otp.status === 'unused' && (
               <Button

@@ -6,15 +6,9 @@ export const ThemeToggle = () => {
   const { isDarkMode, toggleTheme } = useTheme();
 
   return (
-    <Button
-      variant="plain"
-      aria-label="Toggle theme"
-      onClick={toggleTheme}
-    >
+    <Button variant="plain" aria-label="Toggle theme" onClick={toggleTheme}>
       {isDarkMode ? <SunIcon /> : <MoonIcon />}
-      <span style={{ marginLeft: '0.5rem' }}>
-        {isDarkMode ? 'Light' : 'Dark'}
-      </span>
+      <span style={{ marginLeft: '0.5rem' }}>{isDarkMode ? 'Light' : 'Dark'}</span>
     </Button>
   );
 };

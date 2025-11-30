@@ -21,6 +21,7 @@ import {
 } from '@patternfly/react-core';
 import { TrashIcon } from '@patternfly/react-icons';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { format } from 'timeago.js';
 import { useState } from 'react';
 import * as Yup from 'yup';
 import { FormikForm, FormikSelect, FormikTextInput } from '../../shared';
@@ -71,7 +72,7 @@ export const UserManagementTab = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    return format(dateString);
   };
 
   return (

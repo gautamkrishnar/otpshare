@@ -10,9 +10,6 @@ WORKDIR /app
 # Stage 2: Builder (Compiles JS Bundle)
 # ==========================================
 FROM base AS builder
-# Install build tools for native modules (needed for installation)
-RUN apk add --no-cache python3 make g++
-
 # 1. Copy ONLY dependency definitions first (Better caching)
 #    Copy root files and package.json files from workspaces
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -37,7 +34,6 @@ RUN yarn build
 # We create a fresh stage to install ONLY production dependencies.
 # This ensures we get fresh, clean native binaries for the backend.
 FROM base AS prod-deps
-RUN apk add --no-cache python3 make g++
 
 COPY --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
 COPY --from=builder /app/.yarn ./.yarn
@@ -68,7 +64,10 @@ COPY --from=builder /app/packages/frontend/dist ./packages/frontend/dist
 #    This guarantees we don't miss hidden dependencies.
 COPY --from=prod-deps /app/node_modules ./node_modules
 
-# 3. Setup SQLite Data Directory
+# 3. Verify migrations were copied (debug step)
+RUN ls -la ./packages/backend/dist/db/migrations/ || echo "Migrations folder missing!"
+
+# 4. Setup SQLite Data Directory
 RUN mkdir -p /app/data && chown -R node:node /app
 
 USER node
@@ -80,10 +79,10 @@ ENV NODE_ENV=production \
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
+  CMD node -e "import('http').then(http => http.default.get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)))"
 
 ENTRYPOINT ["dumb-init", "--"]
 
 # Note: Since we copied node_modules to the root /app/node_modules,
 # Node will find them automatically when running the script.
-CMD ["node", "packages/backend/dist/index.cjs"]
+CMD ["node", "packages/backend/dist/index.js"]

@@ -28,12 +28,14 @@ export interface OTP {
   code: string;
   status: 'used' | 'unused';
   created_at: string;
+  created_by: number;
   used_at: string | null;
   used_by: number | null;
 }
 
 export interface OTPWithUser extends OTP {
-  username?: string;
+  createdByUsername?: string;
+  usedByUsername?: string;
 }
 
 export interface OTPListResponse {

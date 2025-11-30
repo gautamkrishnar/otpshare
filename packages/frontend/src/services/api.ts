@@ -23,6 +23,31 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Only redirect on 401 if:
+    // 1. We have a token (user was logged in)
+    // 2. We're not on the login/setup page already
+    // 3. The request was using authentication
+    const hasToken = !!localStorage.getItem('token');
+    const isAuthEndpoint = error.config?.url?.includes('/auth/');
+    const currentPath = window.location.pathname;
+    const isLoginPage = currentPath === '/' || currentPath === '/login';
+
+    if (error.response?.status === 401 && hasToken && !isAuthEndpoint && !isLoginPage) {
+      // Token is invalid or user no longer exists - logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      // Use replace to avoid adding to history and force full reload
+      window.location.replace('/');
+      // Don't reject the error after redirect
+      return new Promise(() => {}); // Pending promise to prevent further execution
+    }
+    return Promise.reject(error);
+  },
+);
+
 export const authAPI = {
   login: async (username: string, password: string): Promise<LoginResponse> => {
     const { data } = await api.post('/auth/login', { username, password });

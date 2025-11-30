@@ -10,7 +10,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    const user = UserModel.findByUsername(username);
+    const user = await UserModel.findByUsername(username);
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -42,9 +42,9 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
-export const checkAdminExists = (_req: Request, res: Response) => {
+export const checkAdminExists = async (_req: Request, res: Response) => {
   try {
-    const hasAdmin = UserModel.hasAdminUser();
+    const hasAdmin = await UserModel.hasAdminUser();
     res.json({ hasAdmin });
   } catch (error) {
     console.error('Check admin error:', error);
@@ -55,7 +55,7 @@ export const checkAdminExists = (_req: Request, res: Response) => {
 export const createInitialAdmin = async (req: Request, res: Response) => {
   try {
     // Check if admin already exists
-    if (UserModel.hasAdminUser()) {
+    if (await UserModel.hasAdminUser()) {
       return res.status(400).json({ error: 'Admin user already exists' });
     }
 
@@ -76,7 +76,7 @@ export const createInitialAdmin = async (req: Request, res: Response) => {
     }
 
     // Check if username already exists
-    if (UserModel.findByUsername(username)) {
+    if (await UserModel.findByUsername(username)) {
       return res.status(400).json({ error: 'Username already exists' });
     }
 

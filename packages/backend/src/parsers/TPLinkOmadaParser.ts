@@ -1,15 +1,14 @@
 import type { OTPParser } from './types';
+import PDFParser from 'pdf2json';
 
 export class TPLinkOmadaParser implements OTPParser {
   async parse(data: Buffer): Promise<string[]> {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const PDFParser = require('pdf2json');
-
     return new Promise((resolve, reject) => {
       const pdfParser = new PDFParser();
 
-      pdfParser.on('pdfParser_dataError', (errData: { parserError: string }) => {
-        reject(new Error(errData.parserError));
+      pdfParser.on('pdfParser_dataError', (errData: Error | { parserError: Error }) => {
+        const errorMsg = errData instanceof Error ? errData.message : errData.parserError.message;
+        reject(new Error(errorMsg));
       });
 
       pdfParser.on(

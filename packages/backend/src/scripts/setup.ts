@@ -16,9 +16,9 @@ const question = (query: string): Promise<string> => {
 const setup = async () => {
   console.log('\n=== OTP Manager - Initial Setup ===\n');
 
-  initializeDatabase();
+  await initializeDatabase();
 
-  const existingUsers = UserModel.findAll();
+  const existingUsers = await UserModel.findAll();
 
   if (existingUsers.length > 0) {
     console.log('Users already exist in the database.');
@@ -41,7 +41,7 @@ const setup = async () => {
     return;
   }
 
-  const existingUser = UserModel.findByUsername(username.trim());
+  const existingUser = await UserModel.findByUsername(username.trim());
   if (existingUser) {
     console.log(`Error: User "${username}" already exists.`);
     rl.close();

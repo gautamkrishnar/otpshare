@@ -1,21 +1,42 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { builtinModules } from 'node:module';
+import fs from 'node:fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Plugin to copy the migrations folder
+// noinspection JSUnusedGlobalSymbols
+const copyMigrationsPlugin = () => ({
+  name: 'copy-migrations',
+  closeBundle() {
+    const src = resolve(__dirname, 'src/db/migrations');
+    const dest = resolve(__dirname, 'dist/db/migrations');
+
+    if (fs.existsSync(src)) {
+      fs.cpSync(src, dest, { recursive: true });
+      console.log('Copied migrations to dist/db/migrations');
+    }
+  },
+});
 
 export default defineConfig({
+  plugins: [copyMigrationsPlugin()],
   build: {
     // Treat this as a library/backend build
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      formats: ['cjs'],
-      fileName: 'index.cjs',
+      formats: ['es'],
+      fileName: 'index',
     },
     rollupOptions: {
       // Mark node built-ins (path, fs, etc.) as external
       external: [
         'bcrypt',
-        'better-sqlite3',
         'iconv-lite',
+        '@libsql/client',
         ...builtinModules,
         ...builtinModules.map((m) => `node:${m}`),
       ],
@@ -27,7 +48,7 @@ export default defineConfig({
     minify: false, // Set to true if you want to obfuscate code
   },
   ssr: {
-    // This forces Vite to bundle ALL dependencies except those marked external above
-    noExternal: /^(?!bcrypt|better-sqlite3)/,
+    // This forces Vite to bundle ALL dependencies except those marked externally above
+    noExternal: /^(?!bcrypt)/,
   },
 });

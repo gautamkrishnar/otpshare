@@ -1,4 +1,10 @@
-import { FormGroup, HelperText, HelperTextItem, TextInput, type TextInputProps } from '@patternfly/react-core';
+import {
+  FormGroup,
+  HelperText,
+  HelperTextItem,
+  TextInput,
+  type TextInputProps,
+} from '@patternfly/react-core';
 import { useField } from 'formik';
 
 interface FormikTextInputProps extends Omit<TextInputProps, 'onChange' | 'onBlur' | 'value'> {
@@ -22,12 +28,7 @@ export const FormikTextInput = ({
 
   return (
     <FormGroup label={label} isRequired={isRequired} fieldId={name}>
-      <TextInput
-        id={name}
-        {...field}
-        {...props}
-        validated={validated}
-      />
+      <TextInput id={name} {...field} {...props} validated={validated} />
       {(helperText || hasError) && (
         <HelperText>
           <HelperTextItem variant={hasError ? 'error' : 'default'}>

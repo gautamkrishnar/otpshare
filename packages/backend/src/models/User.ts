@@ -1,6 +1,8 @@
 import type { CreateUserInput, UpdateUserInput, UserWithDates } from '@otpshare/shared';
 import bcrypt from 'bcrypt';
+import { eq, sql } from 'drizzle-orm';
 import db from '../config/database';
+import { users } from '../db/schema';
 
 export interface UserDB extends UserWithDates {
   password_hash: string;
@@ -13,82 +15,72 @@ export class UserModel {
   static async create(input: CreateUserInput): Promise<User> {
     const passwordHash = await bcrypt.hash(input.password, 10);
 
-    const stmt = db.prepare(`
-      INSERT INTO users (username, password_hash, role)
-      VALUES (?, ?, ?)
-    `);
+    const result = await db
+      .insert(users)
+      .values({
+        username: input.username,
+        password_hash: passwordHash,
+        role: input.role,
+      })
+      .returning();
 
-    const result = stmt.run(input.username, passwordHash, input.role);
-
-    return UserModel.findById(result.lastInsertRowid as number)!;
+    return result[0] as User;
   }
 
-  static findById(id: number): User | undefined {
-    const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
-    return stmt.get(id) as User | undefined;
+  static async findById(id: number): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id));
+    return result[0] as User | undefined;
   }
 
-  static findByUsername(username: string): User | undefined {
-    const stmt = db.prepare('SELECT * FROM users WHERE username = ?');
-    return stmt.get(username) as User | undefined;
+  static async findByUsername(username: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.username, username));
+    return result[0] as User | undefined;
   }
 
-  static findAll(): User[] {
-    const stmt = db.prepare('SELECT * FROM users ORDER BY created_at DESC');
-    return stmt.all() as User[];
+  static async findAll(): Promise<User[]> {
+    const result = await db.select().from(users).orderBy(users.created_at);
+    return result as User[];
   }
 
   static async update(id: number, input: UpdateUserInput): Promise<User | undefined> {
-    const user = UserModel.findById(id);
+    const user = await UserModel.findById(id);
     if (!user) return undefined;
 
-    const updates: string[] = [];
-    const values: (string | number)[] = [];
+    const updateData: Record<string, any> = {
+      updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
+    };
 
     if (input.username !== undefined) {
-      updates.push('username = ?');
-      values.push(input.username);
+      updateData.username = input.username;
     }
 
     if (input.password !== undefined) {
-      const passwordHash = await bcrypt.hash(input.password, 10);
-      updates.push('password_hash = ?');
-      values.push(passwordHash);
+      updateData.password_hash = await bcrypt.hash(input.password, 10);
     }
 
     if (input.role !== undefined) {
-      updates.push('role = ?');
-      values.push(input.role);
+      updateData.role = input.role;
     }
 
-    if (updates.length === 0) return user;
+    const result = await db.update(users).set(updateData).where(eq(users.id, id)).returning();
 
-    updates.push('updated_at = CURRENT_TIMESTAMP');
-    values.push(id);
-
-    const stmt = db.prepare(`
-      UPDATE users
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `);
-
-    stmt.run(...values);
-    return UserModel.findById(id);
+    return result[0] as User | undefined;
   }
 
-  static delete(id: number): boolean {
-    const stmt = db.prepare('DELETE FROM users WHERE id = ?');
-    const result = stmt.run(id);
-    return result.changes > 0;
+  static async delete(id: number): Promise<boolean> {
+    const result = await db.delete(users).where(eq(users.id, id));
+    return result.rowsAffected > 0;
   }
 
   static async verifyPassword(user: User, password: string): Promise<boolean> {
     return bcrypt.compare(password, user.password_hash);
   }
 
-  static hasAdminUser(): boolean {
-    const stmt = db.prepare('SELECT COUNT(*) as count FROM users WHERE role = ?');
-    const result = stmt.get('admin') as { count: number };
-    return result.count > 0;
+  static async hasAdminUser(): Promise<boolean> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(users)
+      .where(eq(users.role, 'admin'));
+    return result[0].count > 0;
   }
 }

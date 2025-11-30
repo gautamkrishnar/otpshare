@@ -1,7 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import Database from 'better-sqlite3';
-import type BetterSqlite3 from 'better-sqlite3';
+import { fileURLToPath } from 'node:url';
+import { drizzle } from 'drizzle-orm/libsql';
+import { migrate } from 'drizzle-orm/libsql/migrator';
+import { sql } from 'drizzle-orm';
+import * as schema from '../db/schema';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const dbPath = process.env.DATABASE_PATH || './data/otpmanager.db';
 const dbDir = path.dirname(dbPath);
@@ -10,47 +16,39 @@ if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const db: BetterSqlite3.Database = new Database(dbPath);
+// Setup database connection - use file: prefix for local SQLite files
+const absolutePath = path.resolve(dbPath);
+console.log('Database path: ', absolutePath);
 
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+// Use the recommended Drizzle approach with connection URL
+export const db = drizzle({
+  connection: { url: `file:${absolutePath}` },
+  schema,
+});
 
-export const initializeDatabase = () => {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      password_hash TEXT NOT NULL,
-      role TEXT NOT NULL CHECK(role IN ('admin', 'user')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+export const initializeDatabase = async () => {
+  // Enable WAL mode and foreign keys using raw SQL
+  await db.run(sql`PRAGMA journal_mode = WAL`);
+  await db.run(sql`PRAGMA foreign_keys = ON`);
 
-    CREATE TABLE IF NOT EXISTS otps (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      code TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'unused' CHECK(status IN ('used', 'unused')),
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      used_at DATETIME,
-      used_by INTEGER,
-      FOREIGN KEY (used_by) REFERENCES users(id)
-    );
+  // Run migrations
+  // In dev: __dirname is src/config, migrations at src/db/migrations (../db/migrations)
+  // In production: __dirname is dist, migrations at dist/db/migrations (db/migrations)
+  let migrationsFolder = path.join(__dirname, 'db/migrations');
+  if (!fs.existsSync(migrationsFolder)) {
+    migrationsFolder = path.join(__dirname, '../db/migrations');
+  }
 
-    CREATE TABLE IF NOT EXISTS usage_logs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      otp_id INTEGER NOT NULL,
-      user_id INTEGER NOT NULL,
-      action TEXT NOT NULL,
-      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (otp_id) REFERENCES otps(id) ON DELETE CASCADE,
-      FOREIGN KEY (user_id) REFERENCES users(id)
-    );
+  console.log('Migrations folder path:', migrationsFolder);
+  console.log('Migrations folder exists:', fs.existsSync(migrationsFolder));
 
-    CREATE INDEX IF NOT EXISTS idx_otps_status ON otps(status);
-    CREATE INDEX IF NOT EXISTS idx_otps_created_at ON otps(created_at);
-    CREATE INDEX IF NOT EXISTS idx_usage_logs_otp_id ON usage_logs(otp_id);
-    CREATE INDEX IF NOT EXISTS idx_usage_logs_user_id ON usage_logs(user_id);
-  `);
+  if (fs.existsSync(migrationsFolder)) {
+    const metaPath = path.join(migrationsFolder, 'meta', '_journal.json');
+    console.log('_journal.json path:', metaPath);
+    console.log('_journal.json exists:', fs.existsSync(metaPath));
+  }
+
+  await migrate(db, { migrationsFolder });
 
   console.log('Database initialized successfully');
 };
