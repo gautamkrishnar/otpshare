@@ -28,8 +28,14 @@
     "node": ">=20.11.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css,scss}": [
-      "yarn lint"
+    "packages/backend/**/*.{js,jsx,ts,tsx,json}": [
+      "yarn workspace @otpshare/backend lint"
+    ],
+    "packages/frontend/**/*.{js,jsx,ts,tsx,json,css,scss}": [
+      "yarn workspace @otpshare/frontend lint"
+    ],
+    "packages/shared/**/*.{js,jsx,ts,tsx,json}": [
+      "yarn workspace @otpshare/shared lint"
     ]
   }
 }

@@ -26,10 +26,12 @@ export const otps = sqliteTable(
     used_at: text('used_at'),
     used_by: integer('used_by').references(() => users.id),
   },
-  (table) => ({
-    statusIdx: index('idx_otps_status').on(table.status),
-    createdAtIdx: index('idx_otps_created_at').on(table.created_at),
-  }),
+  (table) => {
+    return {
+      statusIdx: index('idx_otps_status').on(table.status),
+      createdAtIdx: index('idx_otps_created_at').on(table.created_at),
+    };
+  },
 );
 
 export const usage_logs = sqliteTable(
@@ -45,10 +47,12 @@ export const usage_logs = sqliteTable(
     action: text('action').notNull(),
     timestamp: text('timestamp').notNull().default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   },
-  (table) => ({
-    otpIdIdx: index('idx_usage_logs_otp_id').on(table.otp_id),
-    userIdIdx: index('idx_usage_logs_user_id').on(table.user_id),
-  }),
+  (table) => {
+    return {
+      otpIdIdx: index('idx_usage_logs_otp_id').on(table.otp_id),
+      userIdIdx: index('idx_usage_logs_user_id').on(table.user_id),
+    };
+  },
 );
 
 // Type exports

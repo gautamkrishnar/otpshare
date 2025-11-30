@@ -1,6 +1,6 @@
 import type { CreateUserInput, UpdateUserInput, UserWithDates } from '@otpshare/shared';
 import bcrypt from 'bcrypt';
-import { eq, sql } from 'drizzle-orm';
+import { type SQL, eq, sql } from 'drizzle-orm';
 import db from '../config/database';
 import { users } from '../db/schema';
 
@@ -46,7 +46,7 @@ export class UserModel {
     const user = await UserModel.findById(id);
     if (!user) return undefined;
 
-    const updateData: Partial<typeof users.$inferInsert> & { updated_at: ReturnType<typeof sql> } = {
+    const updateData: Record<string, string | number | boolean | SQL> = {
       updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
     };
 
