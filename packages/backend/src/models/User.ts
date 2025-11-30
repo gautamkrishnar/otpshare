@@ -46,7 +46,7 @@ export class UserModel {
     const user = await UserModel.findById(id);
     if (!user) return undefined;
 
-    const updateData: Record<string, any> = {
+    const updateData: Partial<typeof users.$inferInsert> & { updated_at: ReturnType<typeof sql> } = {
       updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
     };
 
@@ -60,6 +60,10 @@ export class UserModel {
 
     if (input.role !== undefined) {
       updateData.role = input.role;
+    }
+
+    if (input.dark_mode !== undefined) {
+      updateData.dark_mode = input.dark_mode;
     }
 
     const result = await db.update(users).set(updateData).where(eq(users.id, id)).returning();

@@ -1,35 +1,49 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { authAPI } from '../services/api';
 
 interface ThemeState {
   isDarkMode: boolean;
-  toggleTheme: () => void;
+  toggleTheme: () => Promise<void>;
+  setTheme: (isDark: boolean) => void;
 }
+
+const applyTheme = (isDark: boolean) => {
+  if (isDark) {
+    document.documentElement.classList.add('pf-v6-theme-dark');
+  } else {
+    document.documentElement.classList.remove('pf-v6-theme-dark');
+  }
+};
 
 export const useTheme = create<ThemeState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       isDarkMode: true,
-      toggleTheme: () =>
-        set((state) => {
-          const newDarkMode = !state.isDarkMode;
-          // Update document class for PatternFly dark theme
-          if (newDarkMode) {
-            document.documentElement.classList.add('pf-v6-theme-dark');
-          } else {
-            document.documentElement.classList.remove('pf-v6-theme-dark');
-          }
-          return { isDarkMode: newDarkMode };
-        }),
+      setTheme: (isDark: boolean) => {
+        applyTheme(isDark);
+        set({ isDarkMode: isDark });
+      },
+      toggleTheme: async () => {
+        const newDarkMode = !get().isDarkMode;
+        applyTheme(newDarkMode);
+        set({ isDarkMode: newDarkMode });
+
+        // Sync with backend
+        try {
+          await authAPI.updatePreferences(newDarkMode);
+        } catch (error) {
+          console.error('Failed to save theme preference:', error);
+          // Don't revert the theme on error - localStorage still persists it
+        }
+      },
     }),
     {
       name: 'theme-storage',
       onRehydrateStorage: () => (state) => {
         // Apply theme on initial load
-        if (state?.isDarkMode) {
-          document.documentElement.classList.add('pf-v6-theme-dark');
-        } else {
-          document.documentElement.classList.remove('pf-v6-theme-dark');
+        if (state) {
+          applyTheme(state.isDarkMode);
         }
       },
     },

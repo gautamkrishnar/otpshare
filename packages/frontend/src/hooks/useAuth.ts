@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../types';
+import { useTheme } from './useTheme';
 
 interface AuthState {
   user: User | null;
@@ -21,6 +22,9 @@ export const useAuth = create<AuthState>()(
       login: (user: User, token: string) => {
         localStorage.setItem('token', token);
         set({ user, token, isAuthenticated: true, isAdmin: user.role === 'admin' });
+
+        // Sync theme with user's preference
+        useTheme.getState().setTheme(user.dark_mode);
       },
       logout: () => {
         localStorage.removeItem('token');

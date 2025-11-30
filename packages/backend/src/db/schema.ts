@@ -6,6 +6,7 @@ export const users = sqliteTable('users', {
   username: text('username').notNull().unique(),
   password_hash: text('password_hash').notNull(),
   role: text('role', { enum: ['admin', 'user'] }).notNull(),
+  dark_mode: integer('dark_mode', { mode: 'boolean' }).notNull().default(true),
   created_at: text('created_at').notNull().default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
   updated_at: text('updated_at').notNull().default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
 });

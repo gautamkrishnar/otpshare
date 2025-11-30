@@ -3,6 +3,7 @@ export interface User {
   id: number;
   username: string;
   role: 'admin' | 'user';
+  dark_mode: boolean;
 }
 
 export interface UserWithDates extends User {
@@ -20,6 +21,7 @@ export interface UpdateUserInput {
   username?: string;
   password?: string;
   role?: 'admin' | 'user';
+  dark_mode?: boolean;
 }
 
 // OTP types

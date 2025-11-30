@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { UserModel } from '../models/User';
 import { generateToken } from '../utils/jwt';
+import type { AuthRequest } from '../middleware/auth';
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -34,6 +35,7 @@ export const login = async (req: Request, res: Response) => {
         id: user.id,
         username: user.username,
         role: user.role,
+        dark_mode: user.dark_mode ?? true,
       },
     });
   } catch (error) {
@@ -101,10 +103,43 @@ export const createInitialAdmin = async (req: Request, res: Response) => {
         id: admin.id,
         username: admin.username,
         role: admin.role,
+        dark_mode: admin.dark_mode ?? true,
       },
     });
   } catch (error) {
     console.error('Create initial admin error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const updatePreferences = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { dark_mode } = req.body;
+
+    if (typeof dark_mode !== 'boolean') {
+      return res.status(400).json({ error: 'dark_mode must be a boolean' });
+    }
+
+    const updatedUser = await UserModel.update(req.user.userId, { dark_mode });
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      user: {
+        id: updatedUser.id,
+        username: updatedUser.username,
+        role: updatedUser.role,
+        dark_mode: updatedUser.dark_mode,
+      },
+    });
+  } catch (error) {
+    console.error('Update preferences error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

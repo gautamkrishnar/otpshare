@@ -63,6 +63,11 @@ export const authAPI = {
     const { data } = await api.post('/auth/initial-admin', { username, password });
     return data;
   },
+
+  updatePreferences: async (dark_mode: boolean): Promise<{ user: UserData }> => {
+    const { data } = await api.put('/auth/preferences', { dark_mode });
+    return data;
+  },
 };
 
 export const otpAPI = {
