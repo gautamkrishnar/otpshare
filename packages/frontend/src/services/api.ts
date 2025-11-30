@@ -68,6 +68,14 @@ export const authAPI = {
     const { data } = await api.put('/auth/preferences', { dark_mode });
     return data;
   },
+
+  changePassword: async (
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> => {
+    const { data } = await api.put('/auth/change-password', { currentPassword, newPassword });
+    return data;
+  },
 };
 
 export const otpAPI = {

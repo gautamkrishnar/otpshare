@@ -24,6 +24,11 @@ export interface UpdateUserInput {
   dark_mode?: boolean;
 }
 
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
 // OTP types
 export interface OTP {
   id: number;

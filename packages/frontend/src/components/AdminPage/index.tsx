@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import { OTPManagementTab } from './OTPManagementTab';
 import { UserManagementTab } from './UserManagementTab';
 import { ThemeToggle } from '../shared/ThemeToggle.tsx';
+import { ChangePasswordModal } from '../shared';
 import { useAuth } from '../../hooks/useAuth';
 import styles from './AdminPage.module.scss';
 
@@ -36,6 +37,7 @@ export const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('otps');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -74,6 +76,7 @@ export const AdminPage = () => {
                   isOpen={isUserDropdownOpen}
                   onSelect={() => setIsUserDropdownOpen(false)}
                   onOpenChange={(isOpen: boolean) => setIsUserDropdownOpen(isOpen)}
+                  popperProps={{ position: 'end' }}
                   toggle={(toggleRef) => (
                     <MenuToggle
                       ref={toggleRef}
@@ -86,6 +89,12 @@ export const AdminPage = () => {
                   )}
                 >
                   <DropdownList>
+                    <DropdownItem
+                      key="change-password"
+                      onClick={() => setIsChangePasswordModalOpen(true)}
+                    >
+                      Change Password
+                    </DropdownItem>
                     <DropdownItem key="logout" onClick={logout}>
                       Logout
                     </DropdownItem>
@@ -125,11 +134,17 @@ export const AdminPage = () => {
   );
 
   return (
-    <Page masthead={masthead} sidebar={sidebar}>
-      <PageSection>
-        {activeTab === 'otps' && <OTPManagementTab />}
-        {activeTab === 'users' && <UserManagementTab />}
-      </PageSection>
-    </Page>
+    <>
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+      />
+      <Page masthead={masthead} sidebar={sidebar}>
+        <PageSection>
+          {activeTab === 'otps' && <OTPManagementTab />}
+          {activeTab === 'users' && <UserManagementTab />}
+        </PageSection>
+      </Page>
+    </>
   );
 };

@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import { useAuth } from '../../hooks/useAuth';
 import { useMarkOTPAsUsed, useOTPs } from '../../hooks/useOTPQueries';
+import { ChangePasswordModal } from '../shared';
 import styles from './DashboardPage.module.scss';
 
 export const DashboardPage = () => {
@@ -35,6 +36,7 @@ export const DashboardPage = () => {
   const markAsUsed = useMarkOTPAsUsed();
   const { user, logout, isAdmin } = useAuth();
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
 
@@ -103,6 +105,7 @@ export const DashboardPage = () => {
                   isOpen={isUserDropdownOpen}
                   onSelect={() => setIsUserDropdownOpen(false)}
                   onOpenChange={(isOpen: boolean) => setIsUserDropdownOpen(isOpen)}
+                  popperProps={{ position: 'end' }}
                   toggle={(toggleRef) => (
                     <MenuToggle
                       ref={toggleRef}
@@ -115,6 +118,12 @@ export const DashboardPage = () => {
                   )}
                 >
                   <DropdownList>
+                    <DropdownItem
+                      key="change-password"
+                      onClick={() => setIsChangePasswordModalOpen(true)}
+                    >
+                      Change Password
+                    </DropdownItem>
                     <DropdownItem key="logout" onClick={logout}>
                       Logout
                     </DropdownItem>
@@ -129,8 +138,13 @@ export const DashboardPage = () => {
   );
 
   return (
-    <Page masthead={masthead} className={styles.dashboardPage__page}>
-      <PageSection isFilled className={styles.dashboardPage__pageSection}>
+    <>
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+      />
+      <Page masthead={masthead} className={styles.dashboardPage__page}>
+        <PageSection isFilled className={styles.dashboardPage__pageSection}>
         <div className={styles.dashboardPage__container}>
           {currentOTP ? (
             <Card className={styles.dashboardPage__card}>
@@ -194,5 +208,6 @@ export const DashboardPage = () => {
         </div>
       </PageSection>
     </Page>
+    </>
   );
 };

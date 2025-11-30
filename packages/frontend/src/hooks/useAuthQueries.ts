@@ -16,3 +16,15 @@ export const useCreateInitialAdmin = () => {
       authAPI.createInitialAdmin(username, password),
   });
 };
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: ({
+      currentPassword,
+      newPassword,
+    }: {
+      currentPassword: string;
+      newPassword: string;
+    }) => authAPI.changePassword(currentPassword, newPassword),
+  });
+};
