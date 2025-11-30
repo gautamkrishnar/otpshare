@@ -69,12 +69,12 @@ jobs:
                 version_digest=$(echo "$version_json" | jq -r '.name')
                 version_date=$(echo "$version_json" | jq -r '.updated_at')
 
-                # Check if this digest is referenced by any manifest
-                if echo "$REFERENCED_DIGESTS" | grep -q "$version_digest"; then
+                # Check if this digest is referenced by any manifest (use -F for literal string matching)
+                if echo "$REFERENCED_DIGESTS" | grep -qF "$version_digest"; then
                   echo "KEEPING: $version_digest (updated: $version_date) - Referenced by a manifest"
                 else
                   echo "DELETING: $version_digest (updated: $version_date) - Orphaned"
-                  gh api -X DELETE /user/packages/container/${{ github.event.repository.name }}/versions/$version_id || echo "Failed to delete $version_id"
+                  gh api -X DELETE "/user/packages/container/${{ github.event.repository.name }}/versions/$version_id" || echo "Failed to delete $version_id"
                 fi
               done
 
