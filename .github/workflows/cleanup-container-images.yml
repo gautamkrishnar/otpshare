@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       days_old:
-        description: 'Delete untagged images older than X days (0 = delete all untagged)'
+        description: 'Delete orphaned untagged images older than X days (0 = delete all orphaned)'
         required: false
         default: '7'
         type: string
@@ -26,35 +26,59 @@ jobs:
       contents: read
 
     steps:
-      - name: Cleanup untagged images
+      - name: Cleanup orphaned untagged images
         run: |
           DAYS_OLD="${{ inputs.days_old || '7' }}"
-          echo "Cleaning up untagged images older than $DAYS_OLD days..."
+          echo "Cleaning up orphaned untagged images older than $DAYS_OLD days..."
+
+          # Step 1: Get all digests referenced by tagged manifests
+          echo "Step 1: Finding all digests referenced by tagged manifests..."
+          REFERENCED_DIGESTS=$(gh api -X GET /user/packages/container/${{ github.event.repository.name }}/versions \
+            --paginate \
+            --jq '.[] | select(.metadata.container.tags | length > 0) | .name' \
+            | while read -r digest; do
+                echo "Checking manifest: $digest"
+                # Use docker buildx imagetools to inspect multi-arch manifest
+                docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@$digest --raw 2>/dev/null \
+                  | jq -r '.manifests[]?.digest // empty' 2>/dev/null || true
+              done | sort -u)
+
+          echo "Protected digests (referenced by manifests):"
+          echo "$REFERENCED_DIGESTS"
+
+          # Step 2: Get all untagged image versions
+          echo ""
+          echo "Step 2: Finding untagged images..."
 
           if [ "$DAYS_OLD" = "0" ]; then
-            # Delete all untagged images
-            echo "Deleting ALL untagged images..."
-            gh api -X GET /user/packages/container/${{ github.event.repository.name }}/versions \
-              --paginate \
-              --jq '.[] | select(.metadata.container.tags | length == 0) | .id' \
-              | while read -r version_id; do
-                  echo "Deleting untagged image version: $version_id"
-                  gh api -X DELETE /user/packages/container/${{ github.event.repository.name }}/versions/$version_id || true
-                done
+            CUTOFF_DATE="9999-12-31T23:59:59Z"
           else
-            # Delete untagged images older than specified days
             CUTOFF_DATE=$(date -u -d "$DAYS_OLD days ago" +"%Y-%m-%dT%H:%M:%SZ" 2>/dev/null || date -u -v-${DAYS_OLD}d +"%Y-%m-%dT%H:%M:%SZ")
-            echo "Deleting untagged images older than $CUTOFF_DATE..."
-
-            gh api -X GET /user/packages/container/${{ github.event.repository.name }}/versions \
-              --paginate \
-              --jq --arg cutoff "$CUTOFF_DATE" '.[] | select(.metadata.container.tags | length == 0) | select(.updated_at < $cutoff) | .id' \
-              | while read -r version_id; do
-                  echo "Deleting untagged image version: $version_id"
-                  gh api -X DELETE /user/packages/container/${{ github.event.repository.name }}/versions/$version_id || true
-                done
           fi
 
+          echo "Cutoff date: $CUTOFF_DATE"
+          echo ""
+
+          # Step 3: Delete untagged images that are NOT referenced and older than cutoff
+          gh api -X GET /user/packages/container/${{ github.event.repository.name }}/versions \
+            --paginate \
+            --jq --arg cutoff "$CUTOFF_DATE" '.[] | select(.metadata.container.tags | length == 0) | select(.updated_at < $cutoff) | {id: .id, name: .name, updated_at: .updated_at}' \
+            | jq -c '.' \
+            | while read -r version_json; do
+                version_id=$(echo "$version_json" | jq -r '.id')
+                version_digest=$(echo "$version_json" | jq -r '.name')
+                version_date=$(echo "$version_json" | jq -r '.updated_at')
+
+                # Check if this digest is referenced by any manifest
+                if echo "$REFERENCED_DIGESTS" | grep -q "$version_digest"; then
+                  echo "KEEPING: $version_digest (updated: $version_date) - Referenced by a manifest"
+                else
+                  echo "DELETING: $version_digest (updated: $version_date) - Orphaned"
+                  gh api -X DELETE /user/packages/container/${{ github.event.repository.name }}/versions/$version_id || echo "Failed to delete $version_id"
+                fi
+              done
+
+          echo ""
           echo "Cleanup completed!"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
