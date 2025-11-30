@@ -10,6 +10,9 @@ WORKDIR /app
 # Stage 2: Builder (Compiles JS Bundle)
 # ==========================================
 FROM base AS builder
+# Install build tools for native modules (needed for installation)
+RUN apk add --no-cache python3 make g++
+
 # 1. Copy ONLY dependency definitions first (Better caching)
 #    Copy root files and package.json files from workspaces
 COPY package.json yarn.lock .yarnrc.yml ./
@@ -34,6 +37,7 @@ RUN yarn build
 # We create a fresh stage to install ONLY production dependencies.
 # This ensures we get fresh, clean native binaries for the backend.
 FROM base AS prod-deps
+RUN apk add --no-cache python3 make g++
 
 COPY --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
 COPY --from=builder /app/.yarn ./.yarn
