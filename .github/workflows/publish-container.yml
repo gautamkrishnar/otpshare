@@ -141,14 +141,3 @@ jobs:
       - name: Inspect image
         run: |
           docker buildx imagetools inspect ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
-
-      - name: Cleanup old untagged images
-        continue-on-error: true
-        run: |
-          # Get package versions that are untagged and older than 1 day
-          gh api -X GET /user/packages/container/${{ github.event.repository.name }}/versions \
-            --paginate \
-            --jq '.[] | select(.metadata.container.tags | length == 0) | select(.updated_at < (now - 86400 | strftime("%Y-%m-%dT%H:%M:%SZ"))) | .id' \
-            | xargs -I {} gh api -X DELETE /user/packages/container/${{ github.event.repository.name }}/versions/{} || true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
