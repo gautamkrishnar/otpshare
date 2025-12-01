@@ -10,7 +10,7 @@ import {
   Spinner,
   TextInput,
 } from '@patternfly/react-core';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSettings, useUpdateSettings } from '../../../hooks/useSettingsQueries';
 import styles from './SettingsTab.module.scss';
 
@@ -57,7 +57,7 @@ export const SettingsTab = () => {
           setHasChanges(false);
           setValidationError('');
         },
-      }
+      },
     );
   };
 
@@ -99,11 +99,7 @@ export const SettingsTab = () => {
             )}
 
             <Form>
-              <FormGroup
-                label="JWT Token Expiration (hours)"
-                isRequired
-                fieldId="jwt-expiration"
-              >
+              <FormGroup label="JWT Token Expiration (hours)" isRequired fieldId="jwt-expiration">
                 <TextInput
                   isRequired
                   type="number"
@@ -116,8 +112,18 @@ export const SettingsTab = () => {
                   aria-describedby="jwt-expiration-helper"
                   className={styles.jwtExpirationInput}
                 />
-                <div id="jwt-expiration-helper" style={{ fontSize: '0.875rem', marginTop: '0.25rem', color: validationError ? 'var(--pf-v5-global--danger-color--100)' : 'var(--pf-v5-global--Color--200)' }}>
-                  {validationError || 'Duration in hours before JWT tokens expire. Users will need to log in again after this period.'}
+                <div
+                  id="jwt-expiration-helper"
+                  style={{
+                    fontSize: '0.875rem',
+                    marginTop: '0.25rem',
+                    color: validationError
+                      ? 'var(--pf-v5-global--danger-color--100)'
+                      : 'var(--pf-v5-global--Color--200)',
+                  }}
+                >
+                  {validationError ||
+                    'Duration in hours before JWT tokens expire. Users will need to log in again after this period.'}
                 </div>
               </FormGroup>
 

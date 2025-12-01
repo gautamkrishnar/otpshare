@@ -15,7 +15,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "biome lint src/",
+    "lint": "biome check --write src/",
     "format": "biome format --write src/",
     "check": "biome check --write src/"
   },

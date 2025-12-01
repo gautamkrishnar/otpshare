@@ -172,8 +172,10 @@ export const adminAPI = {
     return data;
   },
 
-  updateSettings: async (settings: Record<string, string>): Promise<{ message: string; settings: Record<string, string> }> => {
-    const { data} = await api.put('/admin/settings', { settings });
+  updateSettings: async (
+    settings: Record<string, string>,
+  ): Promise<{ message: string; settings: Record<string, string> }> => {
+    const { data } = await api.put('/admin/settings', { settings });
     return data;
   },
 };

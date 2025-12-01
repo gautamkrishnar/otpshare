@@ -1,4 +1,4 @@
-import { Button, Label, Card, CardBody, Flex, FlexItem } from '@patternfly/react-core';
+import { Button, Card, CardBody, Flex, FlexItem, Label } from '@patternfly/react-core';
 import { TrashIcon } from '@patternfly/react-icons';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { format } from 'timeago.js';

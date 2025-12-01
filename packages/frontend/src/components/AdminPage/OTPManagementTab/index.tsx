@@ -7,10 +7,10 @@ import {
   useDeleteOTP,
   useImportOTPs,
   useImportOTPsFromFile,
-  useMarkBulkOTPsAsUsed,
   useMarkBulkOTPsAsUnused,
-  useMarkOTPAsUsed,
+  useMarkBulkOTPsAsUsed,
   useMarkOTPAsUnused,
+  useMarkOTPAsUsed,
 } from '../../../hooks/useOTPQueries.ts';
 import { adminAPI } from '../../../services/api.ts';
 import { VendorType } from '../../../types';

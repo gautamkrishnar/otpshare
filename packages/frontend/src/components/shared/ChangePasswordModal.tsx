@@ -1,16 +1,9 @@
-import {
-  Alert,
-  Button,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalVariant,
-} from '@patternfly/react-core';
+import { Alert, Button, Modal, ModalBody, ModalFooter, ModalVariant } from '@patternfly/react-core';
 import type { FormikProps } from 'formik';
 import { useRef, useState } from 'react';
 import * as Yup from 'yup';
-import { FormikForm, FormikTextInput } from './index';
 import { useChangePassword } from '../../hooks/useAuthQueries';
+import { FormikForm, FormikTextInput } from './index';
 
 const changePasswordSchema = Yup.object({
   currentPassword: Yup.string().required('Current password is required'),
@@ -96,12 +89,7 @@ export const ChangePasswordModal = ({ isOpen, onClose }: ChangePasswordModalProp
             type="password"
             isRequired
           />
-          <FormikTextInput
-            label="New Password"
-            name="newPassword"
-            type="password"
-            isRequired
-          />
+          <FormikTextInput label="New Password" name="newPassword" type="password" isRequired />
           <FormikTextInput
             label="Confirm New Password"
             name="confirmPassword"

@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import { useAuth } from './hooks/useAuth';
 import { AdminPage } from './components/AdminPage';
 import { DashboardPage } from './components/DashboardPage';
 import { LoginPage } from './components/LoginPage';
+import { useAuth } from './hooks/useAuth';
 import '@patternfly/react-core/dist/styles/base.css';
 
 const queryClient = new QueryClient({

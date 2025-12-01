@@ -2,9 +2,9 @@ import {
   FormGroup,
   FormSelect,
   FormSelectOption,
+  type FormSelectProps,
   HelperText,
   HelperTextItem,
-  type FormSelectProps,
 } from '@patternfly/react-core';
 import { useField } from 'formik';
 

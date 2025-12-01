@@ -20,9 +20,9 @@ import {
 } from '@patternfly/react-core';
 import { useState } from 'react';
 import * as Yup from 'yup';
-import { FormikForm, FormikSelect, FormikTextInput } from '../../shared';
 import { useCreateUser, useDeleteUser, useUsers } from '../../../hooks/useUserQueries';
 import type { CreateUserInput } from '../../../types';
+import { FormikForm, FormikSelect, FormikTextInput } from '../../shared';
 import { UserTable } from './UserTable';
 
 const createUserSchema = Yup.object({

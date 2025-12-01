@@ -1,11 +1,11 @@
 import { ActionGroup, Alert, Brand, Button, Card, CardBody, Spinner } from '@patternfly/react-core';
 import { useNavigate } from 'react-router-dom';
 import * as Yup from 'yup';
-import { FormikForm, FormikTextInput } from '../shared';
-import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import { useAuth } from '../../hooks/useAuth';
 import { useCheckAdminExists, useCreateInitialAdmin } from '../../hooks/useAuthQueries';
 import { authAPI } from '../../services/api';
+import { FormikForm, FormikTextInput } from '../shared';
+import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import styles from './LoginPage.module.scss';
 
 const loginSchema = Yup.object({

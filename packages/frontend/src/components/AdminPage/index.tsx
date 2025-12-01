@@ -23,15 +23,15 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { BarsIcon, UserIcon } from '@patternfly/react-icons';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OTPManagementTab } from './OTPManagementTab';
-import { UserManagementTab } from './UserManagementTab';
-import { SettingsTab } from './SettingsTab';
-import { ThemeToggle } from '../shared/ThemeToggle.tsx';
-import { ChangePasswordModal } from '../shared';
 import { useAuth } from '../../hooks/useAuth';
+import { ChangePasswordModal } from '../shared';
+import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import styles from './AdminPage.module.scss';
+import { OTPManagementTab } from './OTPManagementTab';
+import { SettingsTab } from './SettingsTab';
+import { UserManagementTab } from './UserManagementTab';
 
 export const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('otps');

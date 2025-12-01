@@ -16,10 +16,10 @@ import type { FormikProps } from 'formik';
 import type { RefObject } from 'react';
 import { useMemo } from 'react';
 import * as Yup from 'yup';
-import { FormikForm, FormikTextArea } from '../../shared';
-import type { VendorType } from '../../../types';
-import { ImportTypeSelector } from './ImportTypeSelector.tsx';
 import { useParserMetadata } from '../../../hooks/useParserQueries';
+import type { VendorType } from '../../../types';
+import { FormikForm, FormikTextArea } from '../../shared';
+import { ImportTypeSelector } from './ImportTypeSelector.tsx';
 
 const importOTPSchema = Yup.object({
   codes: Yup.string()
@@ -88,151 +88,151 @@ export const ImportModal = ({
   }, [selectedParserMeta]);
 
   return (
-  <Modal variant={ModalVariant.medium} title="Import OTPs" isOpen={isOpen} onClose={onClose}>
-    {importType === 'text' ? (
-      <>
-        <ModalBody>
-          <FormikForm
-            innerRef={textModeFormRef}
-            initialValues={{ codes: '' }}
-            validationSchema={importOTPSchema}
-            onSubmit={async (values, { setSubmitting, resetForm }) => {
-              const codes = values.codes
-                .split('\n')
-                .map((line) => line.trim())
-                .filter((line) => line.length > 0);
+    <Modal variant={ModalVariant.medium} title="Import OTPs" isOpen={isOpen} onClose={onClose}>
+      {importType === 'text' ? (
+        <>
+          <ModalBody>
+            <FormikForm
+              innerRef={textModeFormRef}
+              initialValues={{ codes: '' }}
+              validationSchema={importOTPSchema}
+              onSubmit={async (values, { setSubmitting, resetForm }) => {
+                const codes = values.codes
+                  .split('\n')
+                  .map((line) => line.trim())
+                  .filter((line) => line.length > 0);
 
-              onTextImport(codes);
-              resetForm();
-              setSubmitting(false);
-            }}
-          >
-            <>
-              <ImportTypeSelector
-                importType={importType}
-                isOpen={isImportTypeSelectOpen}
-                onSelect={onImportTypeChange}
-                onToggle={onImportTypeToggle}
-              />
-              <FormikTextArea
-                name="codes"
-                label="OTP Codes"
-                helperText="Enter one code per line. Codes can be of any length and format."
-                rows={10}
-                placeholder="CODE001&#10;CODE002&#10;CODE003"
-              />
-            </>
-          </FormikForm>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            variant="primary"
-            onClick={() => {
-              textModeFormRef.current?.submitForm();
-            }}
-            isLoading={isImportingText}
-          >
-            Import
-          </Button>
-          <Button variant="link" onClick={onClose}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </>
-    ) : (
-      <>
-        <ModalBody>
-          <FormikForm
-            innerRef={fileModeFormRef}
-            initialValues={{ file: undefined }}
-            validationSchema={importOTPFileSchema}
-            onSubmit={async (values, { setSubmitting, resetForm }) => {
-              if (!values.file) return;
-
-              onFileImport(values.file, vendorType);
-              resetForm();
-              setSubmitting(false);
-            }}
-          >
-            <>
-              <ImportTypeSelector
-                importType={importType}
-                isOpen={isImportTypeSelectOpen}
-                onSelect={onImportTypeChange}
-                onToggle={onImportTypeToggle}
-              />
-              <FormGroup label="Vendor" isRequired fieldId="vendor-type">
-                <Select
-                  isOpen={isVendorSelectOpen}
-                  selected={vendorType}
-                  onSelect={(_event, selection) => {
-                    onVendorTypeChange(selection as VendorType);
-                    onVendorSelectToggle(false);
-                  }}
-                  onOpenChange={onVendorSelectToggle}
-                  toggle={(toggleRef) => (
-                    <MenuToggle
-                      ref={toggleRef}
-                      onClick={() => onVendorSelectToggle(!isVendorSelectOpen)}
-                    >
-                      {selectedParserMeta?.name || 'Select vendor'}
-                    </MenuToggle>
-                  )}
-                >
-                  <SelectList>
-                    {parsersMetadata?.map((parser) => (
-                      <SelectOption key={parser.vendorType} value={parser.vendorType}>
-                        {parser.name}
-                      </SelectOption>
-                    ))}
-                  </SelectList>
-                </Select>
-              </FormGroup>
-
-              {selectedParserMeta && (
-                <HelperText>
-                  <HelperTextItem variant="indeterminate">
-                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>
-                      {selectedParserMeta.description}
-                    </pre>
-                  </HelperTextItem>
-                </HelperText>
-              )}
-
-              <FormGroup label="Upload File" isRequired fieldId="file-upload">
-                <input
-                  type="file"
-                  id="file-upload"
-                  accept={acceptedFileTypes}
-                  onChange={(e) => {
-                    const selectedFile = e.target.files?.[0];
-                    if (selectedFile) {
-                      fileModeFormRef.current?.setFieldValue('file', selectedFile);
-                    }
-                  }}
-                  style={{ width: '100%' }}
+                onTextImport(codes);
+                resetForm();
+                setSubmitting(false);
+              }}
+            >
+              <>
+                <ImportTypeSelector
+                  importType={importType}
+                  isOpen={isImportTypeSelectOpen}
+                  onSelect={onImportTypeChange}
+                  onToggle={onImportTypeToggle}
                 />
-              </FormGroup>
-            </>
-          </FormikForm>
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            variant="primary"
-            onClick={() => {
-              fileModeFormRef.current?.submitForm();
-            }}
-            isDisabled={isImportingFile}
-            isLoading={isImportingFile}
-          >
-            Import
-          </Button>
-          <Button variant="link" isDisabled={isImportingFile} onClick={onClose}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </>
-    )}
-  </Modal>
+                <FormikTextArea
+                  name="codes"
+                  label="OTP Codes"
+                  helperText="Enter one code per line. Codes can be of any length and format."
+                  rows={10}
+                  placeholder="CODE001&#10;CODE002&#10;CODE003"
+                />
+              </>
+            </FormikForm>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="primary"
+              onClick={() => {
+                textModeFormRef.current?.submitForm();
+              }}
+              isLoading={isImportingText}
+            >
+              Import
+            </Button>
+            <Button variant="link" onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </>
+      ) : (
+        <>
+          <ModalBody>
+            <FormikForm
+              innerRef={fileModeFormRef}
+              initialValues={{ file: undefined }}
+              validationSchema={importOTPFileSchema}
+              onSubmit={async (values, { setSubmitting, resetForm }) => {
+                if (!values.file) return;
+
+                onFileImport(values.file, vendorType);
+                resetForm();
+                setSubmitting(false);
+              }}
+            >
+              <>
+                <ImportTypeSelector
+                  importType={importType}
+                  isOpen={isImportTypeSelectOpen}
+                  onSelect={onImportTypeChange}
+                  onToggle={onImportTypeToggle}
+                />
+                <FormGroup label="Vendor" isRequired fieldId="vendor-type">
+                  <Select
+                    isOpen={isVendorSelectOpen}
+                    selected={vendorType}
+                    onSelect={(_event, selection) => {
+                      onVendorTypeChange(selection as VendorType);
+                      onVendorSelectToggle(false);
+                    }}
+                    onOpenChange={onVendorSelectToggle}
+                    toggle={(toggleRef) => (
+                      <MenuToggle
+                        ref={toggleRef}
+                        onClick={() => onVendorSelectToggle(!isVendorSelectOpen)}
+                      >
+                        {selectedParserMeta?.name || 'Select vendor'}
+                      </MenuToggle>
+                    )}
+                  >
+                    <SelectList>
+                      {parsersMetadata?.map((parser) => (
+                        <SelectOption key={parser.vendorType} value={parser.vendorType}>
+                          {parser.name}
+                        </SelectOption>
+                      ))}
+                    </SelectList>
+                  </Select>
+                </FormGroup>
+
+                {selectedParserMeta && (
+                  <HelperText>
+                    <HelperTextItem variant="indeterminate">
+                      <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>
+                        {selectedParserMeta.description}
+                      </pre>
+                    </HelperTextItem>
+                  </HelperText>
+                )}
+
+                <FormGroup label="Upload File" isRequired fieldId="file-upload">
+                  <input
+                    type="file"
+                    id="file-upload"
+                    accept={acceptedFileTypes}
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0];
+                      if (selectedFile) {
+                        fileModeFormRef.current?.setFieldValue('file', selectedFile);
+                      }
+                    }}
+                    style={{ width: '100%' }}
+                  />
+                </FormGroup>
+              </>
+            </FormikForm>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              variant="primary"
+              onClick={() => {
+                fileModeFormRef.current?.submitForm();
+              }}
+              isDisabled={isImportingFile}
+              isLoading={isImportingFile}
+            >
+              Import
+            </Button>
+            <Button variant="link" isDisabled={isImportingFile} onClick={onClose}>
+              Cancel
+            </Button>
+          </ModalFooter>
+        </>
+      )}
+    </Modal>
   );
 };

@@ -1,5 +1,5 @@
-import { Button, Checkbox, Label, Card, CardBody, Flex, FlexItem } from '@patternfly/react-core';
-import { TrashIcon, CheckCircleIcon, UndoIcon } from '@patternfly/react-icons';
+import { Button, Card, CardBody, Checkbox, Flex, FlexItem, Label } from '@patternfly/react-core';
+import { CheckCircleIcon, TrashIcon, UndoIcon } from '@patternfly/react-icons';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { format } from 'timeago.js';
 import type { OTPWithUser } from '../../../types';

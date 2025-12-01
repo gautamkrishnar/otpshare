@@ -15,7 +15,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
-    "lint": "biome lint src/",
+    "lint": "biome check --write src/",
     "format": "biome format --write src/",
     "check": "biome check --write src/"
   },

@@ -25,10 +25,10 @@ import {
 import { CheckCircleIcon, CopyIcon, UserIcon } from '@patternfly/react-icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import { useAuth } from '../../hooks/useAuth';
 import { useMarkOTPAsUsed, useOTPs } from '../../hooks/useOTPQueries';
 import { ChangePasswordModal } from '../shared';
+import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import styles from './DashboardPage.module.scss';
 
 export const DashboardPage = () => {

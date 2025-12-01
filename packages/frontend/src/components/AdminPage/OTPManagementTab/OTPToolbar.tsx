@@ -5,10 +5,10 @@ import {
   SearchInput,
   Toolbar,
   ToolbarContent,
-  ToolbarItem,
   ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
-import { CheckCircleIcon, UndoIcon, TrashIcon } from '@patternfly/react-icons';
+import { CheckCircleIcon, TrashIcon, UndoIcon } from '@patternfly/react-icons';
 import styles from './OTPToolbar.module.scss';
 
 interface OTPToolbarProps {
