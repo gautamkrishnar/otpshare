@@ -9,6 +9,7 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['otp-logo.svg'],
       manifest: {
+        id: 'pw.gkr.apps.otpmanager',
         name: 'OTP Manager',
         short_name: 'OTP Manager',
         description: 'Secure One-Time Password Management System',
@@ -16,7 +17,7 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         scope: '/',
-        start_url: '/',
+        start_url: '/dashboard',
         orientation: 'portrait-primary',
         icons: [
           {
@@ -40,6 +41,21 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
+          },
+        ],
+        screenshots: [
+          {
+            src: 'screenshot-mobile.png',
+            sizes: '750x1334',
+            type: 'image/png',
+            label: 'OTP Manager Mobile View',
+          },
+          {
+            src: 'screenshot-desktop.png',
+            sizes: '1920x1080',
+            type: 'image/png',
+            form_factor: 'wide',
+            label: 'OTP Manager Desktop View',
           },
         ],
       },
