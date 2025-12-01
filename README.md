@@ -21,18 +21,16 @@ OTP Manager is a self-hosted, enterprise-ready solution for managing and distrib
 
 ## Features
 
-### Core Capabilities
-- **📱 Centralized OTP Distribution** - Single source of truth for all one-time passwords
+- **📱 Progressive Web App** - Installable on any platform (iOS, Android, Windows, macOS, Linux)
+- **🌐 Centralized OTP Distribution** - Single source of truth for all one-time passwords
 - **👥 Multi-User Support** - Manage OTP access across unlimited users and teams
 - **✅ Real-time Status Tracking** - Instant visibility into OTP usage and availability
-- **📊 Advanced Admin Dashboard** - Comprehensive management interface with bulk operations
 - **🔒 Role-Based Access Control (RBAC)** - Granular permissions for admins and regular users
 - **📥 Smart Import System** - Multiple import methods including plain text, PDF parsing, and bulk paste
-- **🔌 TP-Link Omada Integration** - Native PDF import support for Omada Controller voucher exports
-- **🔄 Vendor Parser Framework** - Extensible architecture for adding more network equipment integrations
+- **🔌 Vendor Integrations** - Native support for network equipment vendors ([see supported vendors](#vendor-support--integrations))
+- **🔄 Extensible Parser Framework** - Easy to add support for additional vendors and formats
 - **📁 Bulk Operations** - Import, delete, and mark multiple OTPs as used in one action
 - **🔍 Search & Filter** - Quickly find OTPs with advanced search and filtering capabilities
-- **📈 Usage Analytics** - Track OTP consumption patterns and statistics
 
 ## Quick Start
 
@@ -65,105 +63,48 @@ On first startup, you'll be prompted to create an admin account. No default cred
 
 ### Local Development
 
-#### Prerequisites
-- Node.js >= 20.11.0
-- Yarn 4.0.2 (managed via corepack)
+For detailed development setup instructions, see the **[Development Setup Guide](https://github.com/gautamkrishnar/otpshare/wiki/Development-Setup)** in the project wiki.
 
-```bash
-# Enable corepack (if not already enabled)
-corepack enable
+## Documentation
 
-# Install dependencies
-yarn install
+📖 **[Visit the Wiki](https://github.com/gautamkrishnar/otpshare/wiki)** for complete documentation
 
-# Build shared types
-yarn workspace @otpshare/shared build
+**Quick Links:**
+- [Installation Guide](https://github.com/gautamkrishnar/otpshare/wiki/Installation-Guide) - Deploy with Docker or from source
+- [Quick Import Guide](https://github.com/gautamkrishnar/otpshare/wiki/Quick-Import-Guide) - Import your first OTPs
+- [TP-Link Omada Integration](https://github.com/gautamkrishnar/otpshare/wiki/TP%E2%80%90Link-Omada-Integration) - Import from Omada Controller
+- [Development Setup](https://github.com/gautamkrishnar/otpshare/wiki/Development-Setup) - Set up local environment
+- [Contributing Guide](https://github.com/gautamkrishnar/otpshare/wiki/Contributing) - How to contribute
 
-# Run in development mode
-yarn dev
-```
+## Vendor Support & Integrations
 
-Access the application at:
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:3001`
+OTP Manager supports multiple methods for importing one-time passwords, including native integrations with popular network equipment vendors.
 
-### Importing OTPs
+### Currently Supported
 
-#### TP-Link Omada Integration
-1. Log in to your TP-Link Omada Controller
-2. Navigate to **Guest Portal > Vouchers**
-3. Select vouchers and click **Export** (saves as PDF)
-4. In OTP Manager, go to **Admin Dashboard > OTP Management**
-5. Click **Import OTPs** and select **Voucher Export**
-6. Choose **TP-Link Omada** as vendor
-7. Upload the exported PDF file
-8. OTPs are automatically extracted and imported!
+#### Network Equipment Vendors
+- ✅ **[TP-Link Omada](https://github.com/gautamkrishnar/otpshare/wiki/TP%E2%80%90Link-Omada-Integration)** - Direct PDF voucher import from Omada Controller
+  - Supports guest portal voucher exports
+  - Automatic parsing and batch import
+  - [View Integration Guide →](https://github.com/gautamkrishnar/otpshare/wiki/TP%E2%80%90Link-Omada-Integration)
 
-#### Plain Text Import
-1. Create a text file with one OTP per line
-2. In OTP Manager, go to **Admin Dashboard > OTP Management**
-3. Click **Import OTPs** and select **Plain Text**
-4. Paste your codes or upload the file
-5. Click **Import**
-
-## Contributing
-
-We welcome contributions from the community! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated.
-
-### How to Contribute
-
-1. **Fork the repository**
-2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Make your changes** and commit (`git commit -m 'Add amazing feature'`)
-4. **Push to your fork** (`git push origin feature/amazing-feature`)
-5. **Open a Pull Request**
-
-### Development Guidelines
-
-```bash
-# Run linting
-yarn lint
-
-# Format code
-yarn format
-
-# Type checking
-yarn build
-
-# Run all checks
-yarn check
-```
-
-### Code Quality Standards
-- ✅ TypeScript strict mode enabled
-- ✅ All new features must include appropriate types
-- ✅ Follow existing code style (enforced by Biome)
-- ✅ Write meaningful commit messages
-- ✅ Update documentation for new features
-
-## Supported Integrations
-
-### Current Integrations
-- ✅ **TP-Link Omada** - Import vouchers directly from PDF exports
+#### Generic Import Methods
 - ✅ **Plain Text** - Import from text files (one code per line)
 - ✅ **Manual Entry** - Bulk paste codes into the admin interface
 
-### Coming Soon
-- 🔜 **UniFi Network** - Ubiquiti guest portal voucher imports
-- 🔜 **Cisco Meraki** - Guest WiFi voucher integration
-- 🔜 **Aruba Networks** - ClearPass guest access codes
-- 🔜 **Ruckus Wireless** - SmartZone voucher exports
-- 🔜 **MikroTik** - User manager voucher integration
-- 🔜 **pfSense/OPNsense** - Captive portal voucher integration
-- 🔜 **CSV/Excel** - Universal spreadsheet import
-- 🔜 **REST API** - Programmatic OTP import from external systems
+More vendors coming soon! [Request an integration](https://github.com/gautamkrishnar/otpshare/issues/new?labels=enhancement,integration) or view the [roadmap](https://github.com/gautamkrishnar/otpshare/wiki/Home#-integrations).
 
-Want to see support for a specific platform? [Request an integration](https://github.com/gautamkrishnar/otpshare/issues/new?labels=enhancement,integration)!
+## Contributing
+
+We welcome contributions! See the **[Contributing Guide](https://github.com/gautamkrishnar/otpshare/wiki/Contributing)** for details on:
+- Development setup and workflow
+- Code style and quality standards
+- Pull request process
+- Adding vendor integrations
 
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
 
 ## Support & Community
 
