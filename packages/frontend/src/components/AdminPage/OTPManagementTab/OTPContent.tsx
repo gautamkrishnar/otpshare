@@ -20,9 +20,11 @@ interface OTPContentProps {
   onSelectAll: (checked: boolean) => void;
   onSelectOTP: (id: number, checked: boolean) => void;
   onMarkAsUsed: (id: number) => void;
+  onMarkAsUnused: (id: number) => void;
   onDelete: (id: number) => void;
   onImportClick: () => void;
   isMarkingAsUsed: boolean;
+  isMarkingAsUnused: boolean;
   isDeleting: boolean;
 }
 
@@ -36,9 +38,11 @@ export const OTPContent = ({
   onSelectAll,
   onSelectOTP,
   onMarkAsUsed,
+  onMarkAsUnused,
   onDelete,
   onImportClick,
   isMarkingAsUsed,
+  isMarkingAsUnused,
   isDeleting,
 }: OTPContentProps) => {
   if (isLoading) {
@@ -84,8 +88,10 @@ export const OTPContent = ({
       onSelectAll={onSelectAll}
       onSelectOTP={onSelectOTP}
       onMarkAsUsed={onMarkAsUsed}
+      onMarkAsUnused={onMarkAsUnused}
       onDelete={onDelete}
       isMarkingAsUsed={isMarkingAsUsed}
+      isMarkingAsUnused={isMarkingAsUnused}
       isDeleting={isDeleting}
     />
   );

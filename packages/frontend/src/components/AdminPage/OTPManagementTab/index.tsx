@@ -8,7 +8,9 @@ import {
   useImportOTPs,
   useImportOTPsFromFile,
   useMarkBulkOTPsAsUsed,
+  useMarkBulkOTPsAsUnused,
   useMarkOTPAsUsed,
+  useMarkOTPAsUnused,
 } from '../../../hooks/useOTPQueries.ts';
 import { adminAPI } from '../../../services/api.ts';
 import { VendorType } from '../../../types';
@@ -35,7 +37,9 @@ export const OTPManagementTab = () => {
   const deleteOTP = useDeleteOTP();
   const deleteBulkOTPs = useDeleteBulkOTPs();
   const markBulkOTPsAsUsed = useMarkBulkOTPsAsUsed();
+  const markBulkOTPsAsUnused = useMarkBulkOTPsAsUnused();
   const markOTPAsUsed = useMarkOTPAsUsed();
+  const markOTPAsUnused = useMarkOTPAsUnused();
   const textModeFormRef = useRef<FormikProps<{ codes: string }>>(null);
   const fileModeFormRef = useRef<FormikProps<{ file: File | undefined }>>(null);
 
@@ -84,6 +88,13 @@ export const OTPManagementTab = () => {
     });
   };
 
+  const handleBulkMarkAsUnused = () => {
+    if (selectedOTPs.size === 0) return;
+    markBulkOTPsAsUnused.mutate(Array.from(selectedOTPs), {
+      onSuccess: () => setSelectedOTPs(new Set()),
+    });
+  };
+
   const handleTextImport = (codes: string[]) => {
     importOTPs.mutate(codes, { onSuccess: handleModalClose });
   };
@@ -107,10 +118,12 @@ export const OTPManagementTab = () => {
             onImportClick={() => setIsImportModalOpen(true)}
             onDownloadBackup={handleDownloadBackup}
             onBulkMarkAsUsed={handleBulkMarkAsUsed}
+            onBulkMarkAsUnused={handleBulkMarkAsUnused}
             onBulkDelete={handleBulkDelete}
             onStatusFilterChange={setStatusFilter}
             onSearchChange={setSearchTerm}
             isMarkingAsUsed={markBulkOTPsAsUsed.isPending}
+            isMarkingAsUnused={markBulkOTPsAsUnused.isPending}
             isDeleting={deleteBulkOTPs.isPending}
           />
 
@@ -131,9 +144,11 @@ export const OTPManagementTab = () => {
             onSelectAll={handleSelectAll}
             onSelectOTP={handleSelectOTP}
             onMarkAsUsed={(id) => markOTPAsUsed.mutate(id)}
+            onMarkAsUnused={(id) => markOTPAsUnused.mutate(id)}
             onDelete={(id) => deleteOTP.mutate(id)}
             onImportClick={() => setIsImportModalOpen(true)}
             isMarkingAsUsed={markOTPAsUsed.isPending}
+            isMarkingAsUnused={markOTPAsUnused.isPending}
             isDeleting={deleteOTP.isPending}
           />
         </CardBody>

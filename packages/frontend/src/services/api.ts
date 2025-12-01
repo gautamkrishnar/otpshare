@@ -149,6 +149,11 @@ export const adminAPI = {
     return data;
   },
 
+  markBulkOTPsAsUnused: async (ids: number[]): Promise<{ count: number }> => {
+    const { data } = await api.post('/admin/otp/bulk/mark-unused', { ids });
+    return data;
+  },
+
   downloadBackup: async (): Promise<void> => {
     const response = await api.get('/admin/backup', { responseType: 'blob' });
     const url = window.URL.createObjectURL(new Blob([response.data]));

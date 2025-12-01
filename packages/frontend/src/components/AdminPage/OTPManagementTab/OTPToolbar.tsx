@@ -15,10 +15,12 @@ interface OTPToolbarProps {
   onImportClick: () => void;
   onDownloadBackup: () => void;
   onBulkMarkAsUsed: () => void;
+  onBulkMarkAsUnused: () => void;
   onBulkDelete: () => void;
   onStatusFilterChange: (status: 'used' | 'unused' | undefined) => void;
   onSearchChange: (value: string) => void;
   isMarkingAsUsed: boolean;
+  isMarkingAsUnused: boolean;
   isDeleting: boolean;
 }
 
@@ -29,10 +31,12 @@ export const OTPToolbar = ({
   onImportClick,
   onDownloadBackup,
   onBulkMarkAsUsed,
+  onBulkMarkAsUnused,
   onBulkDelete,
   onStatusFilterChange,
   onSearchChange,
   isMarkingAsUsed,
+  isMarkingAsUnused,
   isDeleting,
 }: OTPToolbarProps) => (
   <Toolbar>
@@ -53,6 +57,11 @@ export const OTPToolbar = ({
           <ToolbarItem>
             <Button variant="warning" onClick={onBulkMarkAsUsed} isLoading={isMarkingAsUsed}>
               Mark {selectedCount} as Used
+            </Button>
+          </ToolbarItem>
+          <ToolbarItem>
+            <Button variant="warning" onClick={onBulkMarkAsUnused} isLoading={isMarkingAsUnused}>
+              Mark {selectedCount} as Unused
             </Button>
           </ToolbarItem>
           <ToolbarItem>

@@ -319,3 +319,29 @@ export const markBulkOTPsAsUsed = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const markBulkOTPsAsUnused = async (req: AuthRequest, res: Response) => {
+  try {
+    const { ids } = req.body;
+
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'IDs array is required and must not be empty' });
+    }
+
+    const validIds = ids.filter((id) => typeof id === 'number' && !Number.isNaN(id));
+
+    if (validIds.length === 0) {
+      return res.status(400).json({ error: 'No valid IDs provided' });
+    }
+
+    const markedCount = await OTPModel.markBulkAsUnused(validIds);
+
+    res.json({
+      message: `${markedCount} OTP(s) marked as unused successfully`,
+      count: markedCount,
+    });
+  } catch (error) {
+    console.error('Bulk mark OTPs as unused error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

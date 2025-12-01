@@ -88,3 +88,27 @@ export const useMarkBulkOTPsAsUsed = () => {
     },
   });
 };
+
+export const useMarkBulkOTPsAsUnused = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ids: number[]) => adminAPI.markBulkOTPsAsUnused(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['otps'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-otps'] });
+    },
+  });
+};
+
+export const useMarkOTPAsUnused = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => adminAPI.markBulkOTPsAsUnused([id]),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['otps'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-otps'] });
+    },
+  });
+};

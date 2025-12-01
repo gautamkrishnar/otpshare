@@ -11,6 +11,7 @@ import {
   importOTPs,
   importOTPsFromFile,
   markBulkOTPsAsUsed,
+  markBulkOTPsAsUnused,
   updateUser,
 } from '../controllers/adminController';
 import { getSettings, updateSettings } from '../controllers/settingsController';
@@ -28,6 +29,7 @@ router.get('/otp', getAllOTPs);
 router.delete('/otp/:id', deleteOTP);
 router.post('/otp/bulk/delete', deleteBulkOTPs);
 router.post('/otp/bulk/mark-used', markBulkOTPsAsUsed);
+router.post('/otp/bulk/mark-unused', markBulkOTPsAsUnused);
 
 router.post('/users', createUser);
 router.get('/users', getUsers);

@@ -11,8 +11,10 @@ interface OTPTableProps {
   onSelectAll: (checked: boolean) => void;
   onSelectOTP: (id: number, checked: boolean) => void;
   onMarkAsUsed: (id: number) => void;
+  onMarkAsUnused: (id: number) => void;
   onDelete: (id: number) => void;
   isMarkingAsUsed: boolean;
+  isMarkingAsUnused: boolean;
   isDeleting: boolean;
 }
 
@@ -29,8 +31,10 @@ export const OTPTable = ({
   onSelectAll,
   onSelectOTP,
   onMarkAsUsed,
+  onMarkAsUnused,
   onDelete,
   isMarkingAsUsed,
+  isMarkingAsUnused,
   isDeleting,
 }: OTPTableProps) => (
   <Table variant="compact">
@@ -71,7 +75,7 @@ export const OTPTable = ({
           <Td>{formatDateWithUser(otp.created_at, otp.createdByUsername)}</Td>
           <Td>{formatDateWithUser(otp.used_at, otp.usedByUsername)}</Td>
           <Td>
-            {otp.status === 'unused' && (
+            {otp.status === 'unused' ? (
               <Button
                 variant="warning"
                 onClick={() => onMarkAsUsed(otp.id)}
@@ -80,6 +84,16 @@ export const OTPTable = ({
                 style={{ marginRight: '0.5rem' }}
               >
                 Mark as Used
+              </Button>
+            ) : (
+              <Button
+                variant="warning"
+                onClick={() => onMarkAsUnused(otp.id)}
+                size="sm"
+                isLoading={isMarkingAsUnused}
+                style={{ marginRight: '0.5rem' }}
+              >
+                Mark as Unused
               </Button>
             )}
             <Button

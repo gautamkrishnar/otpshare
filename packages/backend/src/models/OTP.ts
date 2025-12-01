@@ -178,4 +178,43 @@ export class OTPModel {
 
     return result.length;
   }
+
+  static async markAsUnused(id: number): Promise<OTP | undefined> {
+    const otp = await OTPModel.findById(id);
+    if (!otp || otp.status === 'unused') {
+      return undefined;
+    }
+
+    const result = await db
+      .update(otps)
+      .set({
+        status: 'unused',
+        used_at: null,
+        used_by: null,
+      })
+      .where(and(eq(otps.id, id), eq(otps.status, 'used')))
+      .returning();
+
+    if (result.length > 0) {
+      return result[0] as OTP;
+    }
+
+    return undefined;
+  }
+
+  static async markBulkAsUnused(ids: number[]): Promise<number> {
+    if (ids.length === 0) return 0;
+
+    const result = await db
+      .update(otps)
+      .set({
+        status: 'unused',
+        used_at: null,
+        used_by: null,
+      })
+      .where(and(inArray(otps.id, ids), eq(otps.status, 'used')))
+      .returning({ id: otps.id });
+
+    return result.length;
+  }
 }
