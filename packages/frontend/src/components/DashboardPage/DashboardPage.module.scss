@@ -32,6 +32,10 @@
   max-width: 600px;
   width: 100%;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
 }
 
 .dashboardPage__card {
@@ -40,6 +44,10 @@
 
 .dashboardPage__cardBody {
   padding: 3rem 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
 }
 
 .dashboardPage__counter {
@@ -68,6 +76,12 @@
 
   &:hover {
     background-color: var(--pf-v6-global--BackgroundColor--300);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    letter-spacing: 0.3rem;
+    padding: 1rem;
   }
 }
 
