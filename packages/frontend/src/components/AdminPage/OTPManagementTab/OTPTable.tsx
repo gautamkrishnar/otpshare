@@ -44,7 +44,7 @@ export const OTPTable = ({
       <Table variant="compact">
         <Thead>
           <Tr>
-            <Th>
+            <Th width={10}>
               <Checkbox
                 id="select-all"
                 isChecked={isAllSelected}
@@ -52,10 +52,10 @@ export const OTPTable = ({
                 aria-label="Select all OTPs"
               />
             </Th>
-            <Th>Code</Th>
-            <Th>Status</Th>
-            <Th>Created</Th>
-            <Th>Used</Th>
+            <Th width={15}>Code</Th>
+            <Th width={15}>Status</Th>
+            <Th width={30}>Created</Th>
+            <Th width={30}>Used</Th>
             <Th>Actions</Th>
           </Tr>
         </Thead>
