@@ -114,6 +114,14 @@ export const AdminPage = () => {
     </Masthead>
   );
 
+  const handleNavItemClick = (callback: () => void) => {
+    callback();
+    // Close sidebar on mobile after clicking a nav item
+    if (window.innerWidth < 1200) {
+      setIsSidebarOpen(false);
+    }
+  };
+
   const sidebar = (
     <PageSidebar isSidebarOpen={isSidebarOpen}>
       <PageSidebarBody>
@@ -122,27 +130,27 @@ export const AdminPage = () => {
             <NavItem
               itemId="otps"
               isActive={activeTab === 'otps'}
-              onClick={() => setActiveTab('otps')}
+              onClick={() => handleNavItemClick(() => setActiveTab('otps'))}
             >
               OTP Management
             </NavItem>
             <NavItem
               itemId="users"
               isActive={activeTab === 'users'}
-              onClick={() => setActiveTab('users')}
+              onClick={() => handleNavItemClick(() => setActiveTab('users'))}
             >
               User Management
             </NavItem>
             <NavItem
               itemId="settings"
               isActive={activeTab === 'settings'}
-              onClick={() => setActiveTab('settings')}
+              onClick={() => handleNavItemClick(() => setActiveTab('settings'))}
             >
               Settings
             </NavItem>
             <NavItem
               itemId="preview"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => handleNavItemClick(() => navigate('/dashboard'))}
             >
               Preview
             </NavItem>
