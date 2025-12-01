@@ -160,6 +160,16 @@ export const adminAPI = {
     link.click();
     link.remove();
   },
+
+  getSettings: async (): Promise<{ settings: Record<string, string> }> => {
+    const { data } = await api.get('/admin/settings');
+    return data;
+  },
+
+  updateSettings: async (settings: Record<string, string>): Promise<{ message: string; settings: Record<string, string> }> => {
+    const { data } = await api.put('/admin/settings', { settings });
+    return data;
+  },
 };
 
 export default api;

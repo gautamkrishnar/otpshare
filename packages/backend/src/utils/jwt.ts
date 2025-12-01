@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { SettingModel } from '../models/Setting';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-this';
 
@@ -8,8 +9,9 @@ export interface JWTPayload {
   role: 'admin' | 'user';
 }
 
-export const generateToken = (payload: JWTPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+export const generateToken = async (payload: JWTPayload): Promise<string> => {
+  const expirationHours = await SettingModel.getJWTExpirationHours();
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: `${expirationHours}h` });
 };
 
 export const verifyToken = (token: string): JWTPayload | null => {

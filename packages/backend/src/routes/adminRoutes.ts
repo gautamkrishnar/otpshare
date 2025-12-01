@@ -13,6 +13,7 @@ import {
   markBulkOTPsAsUsed,
   updateUser,
 } from '../controllers/adminController';
+import { getSettings, updateSettings } from '../controllers/settingsController';
 import { authenticate, requireAdmin } from '../middleware/auth';
 
 const router = Router();
@@ -32,6 +33,9 @@ router.post('/users', createUser);
 router.get('/users', getUsers);
 router.put('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
+
+router.get('/settings', getSettings);
+router.put('/settings', updateSettings);
 
 router.get('/backup', downloadBackup);
 

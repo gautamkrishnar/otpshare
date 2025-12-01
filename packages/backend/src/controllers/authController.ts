@@ -23,7 +23,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = generateToken({
+    const token = await generateToken({
       userId: user.id,
       username: user.username,
       role: user.role,
@@ -90,7 +90,7 @@ export const createInitialAdmin = async (req: Request, res: Response) => {
     });
 
     // Generate token for auto-login
-    const token = generateToken({
+    const token = await generateToken({
       userId: admin.id,
       username: admin.username,
       role: admin.role,

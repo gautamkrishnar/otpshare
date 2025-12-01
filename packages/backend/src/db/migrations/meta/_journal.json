@@ -15,6 +15,13 @@
       "when": 1764513446547,
       "tag": "0001_worried_sugar_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1764567629185,
+      "tag": "0002_happy_talkback",
+      "breakpoints": true
     }
   ]
 }

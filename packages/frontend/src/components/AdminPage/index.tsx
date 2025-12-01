@@ -28,6 +28,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OTPManagementTab } from './OTPManagementTab';
 import { UserManagementTab } from './UserManagementTab';
+import { SettingsTab } from './SettingsTab';
 import { ThemeToggle } from '../shared/ThemeToggle.tsx';
 import { ChangePasswordModal } from '../shared';
 import { useAuth } from '../../hooks/useAuth';
@@ -127,6 +128,13 @@ export const AdminPage = () => {
             >
               User Management
             </NavItem>
+            <NavItem
+              itemId="settings"
+              isActive={activeTab === 'settings'}
+              onClick={() => setActiveTab('settings')}
+            >
+              Settings
+            </NavItem>
           </NavList>
         </Nav>
       </PageSidebarBody>
@@ -143,6 +151,7 @@ export const AdminPage = () => {
         <PageSection>
           {activeTab === 'otps' && <OTPManagementTab />}
           {activeTab === 'users' && <UserManagementTab />}
+          {activeTab === 'settings' && <SettingsTab />}
         </PageSection>
       </Page>
     </>

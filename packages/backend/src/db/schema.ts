@@ -55,6 +55,13 @@ export const usage_logs = sqliteTable(
   },
 );
 
+export const settings = sqliteTable('settings', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  key: text('key').notNull().unique(),
+  value: text('value').notNull(),
+  updated_at: text('updated_at').notNull().default(sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`),
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -62,3 +69,5 @@ export type OTP = typeof otps.$inferSelect;
 export type NewOTP = typeof otps.$inferInsert;
 export type UsageLog = typeof usage_logs.$inferSelect;
 export type NewUsageLog = typeof usage_logs.$inferInsert;
+export type Setting = typeof settings.$inferSelect;
+export type NewSetting = typeof settings.$inferInsert;
