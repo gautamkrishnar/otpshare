@@ -105,7 +105,7 @@ export const UserManagementTab = () => {
               </EmptyState>
             </div>
           ) : (
-            <UserTable users={data!.users} onDeleteClick={handleDeleteClick} />
+            <UserTable users={data?.users} onDeleteClick={handleDeleteClick} />
           )}
         </CardBody>
       </Card>

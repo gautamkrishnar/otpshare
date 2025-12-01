@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/libsql';
 import { migrate } from 'drizzle-orm/libsql/migrator';
-import { sql } from 'drizzle-orm';
 import * as schema from '../db/schema';
 
 const __filename = fileURLToPath(import.meta.url);

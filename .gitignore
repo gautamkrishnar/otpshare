@@ -141,6 +141,10 @@ packages/backend/data/*.db
 packages/backend/data/*.db-shm
 packages/backend/data/*.db-wal
 
+# Vitest cache and coverage (backend)
+packages/backend/.vitest
+packages/backend/coverage
+
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*

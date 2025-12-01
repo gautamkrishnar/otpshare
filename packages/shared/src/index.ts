@@ -76,5 +76,17 @@ export enum VendorType {
 
 // Parser types
 export interface OTPParser {
+  name: string;
   parse(data: Buffer): Promise<string[]>;
+  description: string;
+  fileExtensions: string[];
+  mimeTypes: string[];
+}
+
+export interface ParserMetadata {
+  vendorType: VendorType;
+  name: string;
+  description: string;
+  fileExtensions: string[];
+  mimeTypes: string[];
 }

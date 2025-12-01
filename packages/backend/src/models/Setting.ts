@@ -53,7 +53,9 @@ export class SettingModel {
 
   static async getJWTExpirationHours(): Promise<number> {
     const value = await SettingModel.getValue(SETTING_KEYS.JWT_EXPIRATION_HOURS);
-    const hours = value ? Number.parseInt(value, 10) : Number.parseInt(DEFAULT_SETTINGS[SETTING_KEYS.JWT_EXPIRATION_HOURS], 10);
+    const hours = value
+      ? Number.parseInt(value, 10)
+      : Number.parseInt(DEFAULT_SETTINGS[SETTING_KEYS.JWT_EXPIRATION_HOURS], 10);
 
     // Validate that hours is a positive number
     if (Number.isNaN(hours) || hours <= 0) {

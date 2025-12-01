@@ -10,6 +10,7 @@ export type {
   OTPStats,
   AdminOTPResponse,
   LoginResponse,
+  ParserMetadata,
 } from '@otpshare/shared';
 
 export { VendorType } from '@otpshare/shared';

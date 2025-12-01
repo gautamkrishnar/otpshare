@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-  login,
+  changePassword,
   checkAdminExists,
   createInitialAdmin,
+  login,
   updatePreferences,
-  changePassword,
 } from '../controllers/authController';
 import { authenticate } from '../middleware/auth';
 

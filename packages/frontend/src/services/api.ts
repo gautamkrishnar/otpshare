@@ -4,6 +4,7 @@ import type {
   CreateUserInput,
   LoginResponse,
   OTPListResponse,
+  ParserMetadata,
   UpdateUserInput,
   UserData,
 } from '../types';
@@ -172,7 +173,14 @@ export const adminAPI = {
   },
 
   updateSettings: async (settings: Record<string, string>): Promise<{ message: string; settings: Record<string, string> }> => {
-    const { data } = await api.put('/admin/settings', { settings });
+    const { data} = await api.put('/admin/settings', { settings });
+    return data;
+  },
+};
+
+export const parserAPI = {
+  getMetadata: async (): Promise<ParserMetadata[]> => {
+    const { data } = await api.get('/parsers/metadata');
     return data;
   },
 };

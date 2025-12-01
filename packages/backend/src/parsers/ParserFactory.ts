@@ -1,7 +1,7 @@
-import type { OTPParser } from './types';
-import { VendorType } from './types';
 import { PlainTextParser } from './PlainTextParser';
 import { TPLinkOmadaParser } from './TPLinkOmadaParser';
+import type { OTPParser } from './types';
+import { VendorType } from './types';
 
 export class ParserFactory {
   static getParser(vendorType: VendorType): OTPParser {

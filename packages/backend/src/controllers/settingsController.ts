@@ -62,7 +62,7 @@ export const updateSettings = async (req: AuthRequest, res: Response) => {
 
     res.json({
       message: 'Settings updated successfully',
-      settings: settingsMap
+      settings: settingsMap,
     });
   } catch (error) {
     console.error('Update settings error:', error);

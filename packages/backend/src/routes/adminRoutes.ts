@@ -10,8 +10,8 @@ import {
   getUsers,
   importOTPs,
   importOTPsFromFile,
-  markBulkOTPsAsUsed,
   markBulkOTPsAsUnused,
+  markBulkOTPsAsUsed,
   updateUser,
 } from '../controllers/adminController';
 import { getSettings, updateSettings } from '../controllers/settingsController';

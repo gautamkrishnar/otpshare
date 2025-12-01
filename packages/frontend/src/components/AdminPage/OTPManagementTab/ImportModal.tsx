@@ -1,6 +1,8 @@
 import {
   Button,
   FormGroup,
+  HelperText,
+  HelperTextItem,
   MenuToggle,
   Modal,
   ModalBody,
@@ -12,10 +14,12 @@ import {
 } from '@patternfly/react-core';
 import type { FormikProps } from 'formik';
 import type { RefObject } from 'react';
+import { useMemo } from 'react';
 import * as Yup from 'yup';
 import { FormikForm, FormikTextArea } from '../../shared';
-import { VendorType } from '../../../types';
+import type { VendorType } from '../../../types';
 import { ImportTypeSelector } from './ImportTypeSelector.tsx';
+import { useParserMetadata } from '../../../hooks/useParserQueries';
 
 const importOTPSchema = Yup.object({
   codes: Yup.string()
@@ -70,7 +74,20 @@ export const ImportModal = ({
   onFileImport,
   isImportingText,
   isImportingFile,
-}: ImportModalProps) => (
+}: ImportModalProps) => {
+  const { data: parsersMetadata } = useParserMetadata();
+
+  const selectedParserMeta = useMemo(
+    () => parsersMetadata?.find((p) => p.vendorType === vendorType),
+    [parsersMetadata, vendorType],
+  );
+
+  const acceptedFileTypes = useMemo(() => {
+    if (!selectedParserMeta) return '';
+    return [...selectedParserMeta.fileExtensions, ...selectedParserMeta.mimeTypes].join(',');
+  }, [selectedParserMeta]);
+
+  return (
   <Modal variant={ModalVariant.medium} title="Import OTPs" isOpen={isOpen} onClose={onClose}>
     {importType === 'text' ? (
       <>
@@ -158,21 +175,35 @@ export const ImportModal = ({
                       ref={toggleRef}
                       onClick={() => onVendorSelectToggle(!isVendorSelectOpen)}
                     >
-                      TP-Link Omada
+                      {selectedParserMeta?.name || 'Select vendor'}
                     </MenuToggle>
                   )}
                 >
                   <SelectList>
-                    <SelectOption value={VendorType.TPLINK_OMADA}>TP-Link Omada</SelectOption>
+                    {parsersMetadata?.map((parser) => (
+                      <SelectOption key={parser.vendorType} value={parser.vendorType}>
+                        {parser.name}
+                      </SelectOption>
+                    ))}
                   </SelectList>
                 </Select>
               </FormGroup>
+
+              {selectedParserMeta && (
+                <HelperText>
+                  <HelperTextItem variant="indeterminate">
+                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0 }}>
+                      {selectedParserMeta.description}
+                    </pre>
+                  </HelperTextItem>
+                </HelperText>
+              )}
 
               <FormGroup label="Upload File" isRequired fieldId="file-upload">
                 <input
                   type="file"
                   id="file-upload"
-                  accept=".pdf"
+                  accept={acceptedFileTypes}
                   onChange={(e) => {
                     const selectedFile = e.target.files?.[0];
                     if (selectedFile) {
@@ -203,4 +234,5 @@ export const ImportModal = ({
       </>
     )}
   </Modal>
-);
+  );
+};
