@@ -5,7 +5,6 @@ import {
   Card,
   CardBody,
   CardTitle,
-  Label,
   EmptyState,
   EmptyStateActions,
   EmptyStateBody,
@@ -19,14 +18,12 @@ import {
   ToolbarContent,
   ToolbarItem,
 } from '@patternfly/react-core';
-import { TrashIcon } from '@patternfly/react-icons';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { format } from 'timeago.js';
 import { useState } from 'react';
 import * as Yup from 'yup';
 import { FormikForm, FormikSelect, FormikTextInput } from '../../shared';
 import { useCreateUser, useDeleteUser, useUsers } from '../../../hooks/useUserQueries';
 import type { CreateUserInput } from '../../../types';
+import { UserTable } from './UserTable';
 
 const createUserSchema = Yup.object({
   username: Yup.string()
@@ -71,10 +68,6 @@ export const UserManagementTab = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const formatDate = (dateString: string) => {
-    return format(dateString);
-  };
-
   return (
     <>
       <Card>
@@ -112,47 +105,7 @@ export const UserManagementTab = () => {
               </EmptyState>
             </div>
           ) : (
-            <Table variant="compact">
-              <Thead>
-                <Tr>
-                  <Th>Username</Th>
-                  <Th>Role</Th>
-                  <Th>Created At</Th>
-                  <Th>Updated At</Th>
-                  <Th>Actions</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {data?.users.map((user) => {
-                  const adminCount = data.users.filter((u) => u.role === 'admin').length;
-                  const isLastAdmin = user.role === 'admin' && adminCount <= 1;
-
-                  return (
-                    <Tr key={user.id}>
-                      <Td>{user.username}</Td>
-                      <Td>
-                        <Label isCompact color={user.role === 'admin' ? 'blue' : 'grey'}>
-                          {user.role}
-                        </Label>
-                      </Td>
-                      <Td>{formatDate(user.created_at)}</Td>
-                      <Td>{formatDate(user.updated_at)}</Td>
-                      <Td>
-                        <Button
-                          variant="danger"
-                          icon={<TrashIcon />}
-                          onClick={() => handleDeleteClick(user.id, user.username, user.role)}
-                          size="sm"
-                          isDisabled={isLastAdmin}
-                        >
-                          Delete
-                        </Button>
-                      </Td>
-                    </Tr>
-                  );
-                })}
-              </Tbody>
-            </Table>
+            <UserTable users={data!.users} onDeleteClick={handleDeleteClick} />
           )}
         </CardBody>
       </Card>

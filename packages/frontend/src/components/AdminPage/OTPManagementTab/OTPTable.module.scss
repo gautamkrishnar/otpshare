@@ -1,0 +1,43 @@
+.desktopView {
+  display: block;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.mobileView {
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+
+.mobileCard {
+  margin-bottom: 1rem;
+}
+
+.otpCode {
+  font-size: 1.1rem;
+  word-break: break-all;
+}
+
+.mobileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.mobileLabel {
+  color: var(--pf-v6-global--Color--200);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}

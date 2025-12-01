@@ -6,7 +6,10 @@ import {
   Toolbar,
   ToolbarContent,
   ToolbarItem,
+  ToolbarGroup,
 } from '@patternfly/react-core';
+import { CheckCircleIcon, UndoIcon, TrashIcon } from '@patternfly/react-icons';
+import styles from './OTPToolbar.module.scss';
 
 interface OTPToolbarProps {
   selectedCount: number;
@@ -39,75 +42,92 @@ export const OTPToolbar = ({
   isMarkingAsUnused,
   isDeleting,
 }: OTPToolbarProps) => (
-  <Toolbar>
+  <Toolbar className={styles.toolbar}>
     <ToolbarContent>
-      <ToolbarItem>
-        <Button variant="primary" onClick={onImportClick}>
-          Import OTPs
-        </Button>
-      </ToolbarItem>
-      <ToolbarItem>
-        <Button variant="secondary" onClick={onDownloadBackup}>
-          Download Backup
-        </Button>
-      </ToolbarItem>
-      {selectedCount > 0 && (
-        <>
-          <ToolbarItem variant="separator" />
-          <ToolbarItem>
-            <Button variant="warning" onClick={onBulkMarkAsUsed} isLoading={isMarkingAsUsed}>
-              Mark {selectedCount} as Used
-            </Button>
-          </ToolbarItem>
-          <ToolbarItem>
-            <Button variant="warning" onClick={onBulkMarkAsUnused} isLoading={isMarkingAsUnused}>
-              Mark {selectedCount} as Unused
-            </Button>
-          </ToolbarItem>
-          <ToolbarItem>
-            <Button variant="danger" onClick={onBulkDelete} isLoading={isDeleting}>
-              Delete {selectedCount} Selected
-            </Button>
-          </ToolbarItem>
-        </>
-      )}
-      <ToolbarItem variant="separator" />
-      <ToolbarItem alignSelf="center">
-        <LabelGroup categoryName="Status">
-          <Label
-            key="unused"
-            onClick={() => onStatusFilterChange('unused')}
-            isCompact
-            color={statusFilter === 'unused' ? 'blue' : 'grey'}
-          >
-            Unused
-          </Label>
-          <Label
-            key="used"
-            onClick={() => onStatusFilterChange('used')}
-            isCompact
-            color={statusFilter === 'used' ? 'blue' : 'grey'}
-          >
-            Used
-          </Label>
-          <Label
-            key="all"
-            onClick={() => onStatusFilterChange(undefined)}
-            isCompact
-            color={statusFilter === undefined ? 'blue' : 'grey'}
-          >
-            All
-          </Label>
-        </LabelGroup>
-      </ToolbarItem>
-      <ToolbarItem alignSelf="center">
-        <SearchInput
-          placeholder="Search codes"
-          value={searchTerm}
-          onChange={(_event, value) => onSearchChange(value)}
-          onClear={() => onSearchChange('')}
-        />
-      </ToolbarItem>
+      <ToolbarGroup className={styles.topRow}>
+        <ToolbarItem>
+          <Button variant="primary" onClick={onImportClick}>
+            Import OTPs
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem className={styles.hideOnMobile}>
+          <Button variant="secondary" onClick={onDownloadBackup}>
+            Download Backup
+          </Button>
+        </ToolbarItem>
+        <ToolbarItem className={styles.statusFilter}>
+          <LabelGroup categoryName="Status">
+            <Label
+              key="unused"
+              onClick={() => onStatusFilterChange('unused')}
+              isCompact
+              color={statusFilter === 'unused' ? 'blue' : 'grey'}
+            >
+              Unused
+            </Label>
+            <Label
+              key="used"
+              onClick={() => onStatusFilterChange('used')}
+              isCompact
+              color={statusFilter === 'used' ? 'blue' : 'grey'}
+            >
+              Used
+            </Label>
+            <Label
+              key="all"
+              onClick={() => onStatusFilterChange(undefined)}
+              isCompact
+              color={statusFilter === undefined ? 'blue' : 'grey'}
+            >
+              All
+            </Label>
+          </LabelGroup>
+        </ToolbarItem>
+      </ToolbarGroup>
+
+      <ToolbarGroup className={styles.searchRow}>
+        <ToolbarItem className={styles.searchItem}>
+          <SearchInput
+            placeholder="Search codes"
+            value={searchTerm}
+            onChange={(_event, value) => onSearchChange(value)}
+            onClear={() => onSearchChange('')}
+          />
+        </ToolbarItem>
+      </ToolbarGroup>
+
+      <ToolbarGroup className={styles.bulkActions}>
+        <ToolbarItem>
+          <Button
+            variant="warning"
+            onClick={onBulkMarkAsUsed}
+            isLoading={isMarkingAsUsed}
+            isDisabled={selectedCount === 0}
+            icon={<CheckCircleIcon />}
+            aria-label={`Mark ${selectedCount > 0 ? selectedCount : ''} as used`}
+          />
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            variant="warning"
+            onClick={onBulkMarkAsUnused}
+            isLoading={isMarkingAsUnused}
+            isDisabled={selectedCount === 0}
+            icon={<UndoIcon />}
+            aria-label={`Mark ${selectedCount > 0 ? selectedCount : ''} as unused`}
+          />
+        </ToolbarItem>
+        <ToolbarItem>
+          <Button
+            variant="danger"
+            onClick={onBulkDelete}
+            isLoading={isDeleting}
+            isDisabled={selectedCount === 0}
+            icon={<TrashIcon />}
+            aria-label={`Delete ${selectedCount > 0 ? selectedCount : ''} selected`}
+          />
+        </ToolbarItem>
+      </ToolbarGroup>
     </ToolbarContent>
   </Toolbar>
 );

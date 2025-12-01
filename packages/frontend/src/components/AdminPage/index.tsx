@@ -1,6 +1,5 @@
 import {
   Brand,
-  Button,
   Dropdown,
   DropdownItem,
   DropdownList,
@@ -24,7 +23,7 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { BarsIcon, UserIcon } from '@patternfly/react-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OTPManagementTab } from './OTPManagementTab';
 import { UserManagementTab } from './UserManagementTab';
@@ -36,11 +35,22 @@ import styles from './AdminPage.module.scss';
 
 export const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('otps');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1200);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1200) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const masthead = (
     <Masthead>
@@ -64,11 +74,6 @@ export const AdminPage = () => {
         <Toolbar isFullHeight isStatic>
           <ToolbarContent>
             <ToolbarGroup align={{ default: 'alignEnd' }}>
-              <ToolbarItem>
-                <Button variant="secondary" onClick={() => navigate('/dashboard')}>
-                  User Dashboard
-                </Button>
-              </ToolbarItem>
               <ToolbarItem>
                 <ThemeToggle />
               </ToolbarItem>
@@ -134,6 +139,12 @@ export const AdminPage = () => {
               onClick={() => setActiveTab('settings')}
             >
               Settings
+            </NavItem>
+            <NavItem
+              itemId="preview"
+              onClick={() => navigate('/dashboard')}
+            >
+              Preview
             </NavItem>
           </NavList>
         </Nav>

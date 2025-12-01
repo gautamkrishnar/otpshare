@@ -1,0 +1,71 @@
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.hideOnMobile {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.topRow {
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 769px) {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+.statusFilter {
+  @media (max-width: 768px) {
+    flex: 1;
+
+    :global(.pf-v6-c-label-group) {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    :global(.pf-v6-c-label-group__label) {
+      display: none;
+    }
+  }
+}
+
+.searchRow {
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.searchItem {
+  @media (max-width: 768px) {
+    width: 100%;
+
+    :global(.pf-v6-c-search-input) {
+      width: 100%;
+    }
+  }
+}
+
+.bulkActions {
+  @media (max-width: 768px) {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  @media (min-width: 769px) {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+}

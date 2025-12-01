@@ -93,7 +93,7 @@ export const DashboardPage = () => {
               {isAdmin && (
                 <ToolbarItem>
                   <Button variant="secondary" onClick={() => navigate('/admin')}>
-                    Admin Panel
+                    Admin
                   </Button>
                 </ToolbarItem>
               )}
@@ -145,69 +145,69 @@ export const DashboardPage = () => {
       />
       <Page masthead={masthead} className={styles.dashboardPage__page}>
         <PageSection isFilled className={styles.dashboardPage__pageSection}>
-        <div className={styles.dashboardPage__container}>
-          {currentOTP ? (
-            <Card className={styles.dashboardPage__card}>
-              <CardBody className={styles.dashboardPage__cardBody}>
-                {/* Counter */}
-                <div className={styles.dashboardPage__counter}>
-                  <CheckCircleIcon className={styles.dashboardPage__counterIcon} />
-                  {totalAvailable} code{totalAvailable !== 1 ? 's' : ''} available
-                </div>
-
-                {/* OTP Code Display */}
-                <button
-                  onClick={handleCopy}
-                  className={styles.dashboardPage__otpDisplay}
-                  type="button"
-                >
-                  {currentOTP.code}
-                </button>
-
-                {/* Copy Button */}
-                <Button
-                  variant="secondary"
-                  icon={<CopyIcon />}
-                  onClick={handleCopy}
-                  className={styles.dashboardPage__copyButton}
-                >
-                  {copied ? 'Copied!' : 'Copy Code'}
-                </Button>
-
-                {/* Mark as Used Button */}
-                <Button
-                  variant="primary"
-                  onClick={handleMarkAsUsed}
-                  isLoading={markAsUsed.isPending}
-                  size="lg"
-                  className={styles.dashboardPage__markAsUsedButton}
-                >
-                  Mark as Used
-                </Button>
-
-                {/* Info Text */}
-                {totalAvailable > 1 && (
-                  <div className={styles.dashboardPage__infoText}>
-                    Next code will appear after marking this one as used
+          <div className={styles.dashboardPage__container}>
+            {currentOTP ? (
+              <Card className={styles.dashboardPage__card}>
+                <CardBody className={styles.dashboardPage__cardBody}>
+                  {/* Counter */}
+                  <div className={styles.dashboardPage__counter}>
+                    <CheckCircleIcon className={styles.dashboardPage__counterIcon} />
+                    {totalAvailable} code{totalAvailable !== 1 ? 's' : ''} available
                   </div>
-                )}
-              </CardBody>
-            </Card>
-          ) : (
-            <Card className={styles.dashboardPage__card}>
-              <CardBody className={styles.dashboardPage__cardBody}>
-                <EmptyState variant="lg" titleText="No OTPs Available">
-                  <EmptyStateBody>
-                    There are no unused OTPs available at the moment. Please contact an
-                    administrator to import new codes.
-                  </EmptyStateBody>
-                </EmptyState>
-              </CardBody>
-            </Card>
-          )}
-        </div>
-      </PageSection>
-    </Page>
+
+                  {/* OTP Code Display */}
+                  <button
+                    onClick={handleCopy}
+                    className={styles.dashboardPage__otpDisplay}
+                    type="button"
+                  >
+                    {currentOTP.code}
+                  </button>
+
+                  {/* Copy Button */}
+                  <Button
+                    variant="secondary"
+                    icon={<CopyIcon />}
+                    onClick={handleCopy}
+                    className={styles.dashboardPage__copyButton}
+                  >
+                    {copied ? 'Copied!' : 'Copy Code'}
+                  </Button>
+
+                  {/* Mark as Used Button */}
+                  <Button
+                    variant="primary"
+                    onClick={handleMarkAsUsed}
+                    isLoading={markAsUsed.isPending}
+                    size="lg"
+                    className={styles.dashboardPage__markAsUsedButton}
+                  >
+                    Mark as Used
+                  </Button>
+
+                  {/* Info Text */}
+                  {totalAvailable > 1 && (
+                    <div className={styles.dashboardPage__infoText}>
+                      Next code will appear after marking this one as used
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            ) : (
+              <Card className={styles.dashboardPage__card}>
+                <CardBody className={styles.dashboardPage__cardBody}>
+                  <EmptyState variant="lg" titleText="No OTPs Available">
+                    <EmptyStateBody>
+                      There are no unused OTPs available at the moment. Please contact an
+                      administrator to import new codes.
+                    </EmptyStateBody>
+                  </EmptyState>
+                </CardBody>
+              </Card>
+            )}
+          </div>
+        </PageSection>
+      </Page>
     </>
   );
 };
