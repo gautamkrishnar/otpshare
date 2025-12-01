@@ -1,13 +1,8 @@
 name: Publish Container to GHCR
 on:
   push:
-    branches:
-      - master
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - master
   workflow_dispatch:
 
 env:
@@ -49,15 +44,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-          flavor: |
-            latest=false
+            type=raw,value=latest
 
       - name: Sanitize platform name
         id: platform
@@ -74,17 +64,15 @@ jobs:
           cache-from: type=gha,scope=${{ steps.platform.outputs.safe }}
           cache-to: type=gha,mode=max,scope=${{ steps.platform.outputs.safe }}
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=${{ github.event_name != 'pull_request' }}
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
-        if: github.event_name != 'pull_request'
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ steps.platform.outputs.safe }}
@@ -94,7 +82,6 @@ jobs:
 
   merge-manifests:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     needs: build-and-push
     permissions:
       contents: read
@@ -124,13 +111,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
