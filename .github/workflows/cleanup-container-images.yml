@@ -62,8 +62,7 @@ jobs:
           # Step 3: Delete untagged images that are NOT referenced and older than cutoff
           gh api -X GET /user/packages/container/${{ github.event.repository.name }}/versions \
             --paginate \
-            --jq --arg cutoff "$CUTOFF_DATE" '.[] | select(.metadata.container.tags | length == 0) | select(.updated_at < $cutoff) | {id: .id, name: .name, updated_at: .updated_at}' \
-            | jq -c '.' \
+            | jq --arg cutoff "$CUTOFF_DATE" -c '.[] | select(.metadata.container.tags | length == 0) | select(.updated_at < $cutoff) | {id: .id, name: .name, updated_at: .updated_at}' \
             | while read -r version_json; do
                 version_id=$(echo "$version_json" | jq -r '.id')
                 version_digest=$(echo "$version_json" | jq -r '.name')
