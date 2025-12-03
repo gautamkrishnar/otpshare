@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authAPI } from '../services/api';
+import { useAuth } from './useAuth';
 
 interface ThemeState {
   isDarkMode: boolean;
@@ -29,12 +30,15 @@ export const useTheme = create<ThemeState>()(
         applyTheme(newDarkMode);
         set({ isDarkMode: newDarkMode });
 
-        // Sync with backend
-        try {
-          await authAPI.updatePreferences(newDarkMode);
-        } catch (error) {
-          console.error('Failed to save theme preference:', error);
-          // Don't revert the theme on error - localStorage still persists it
+        // Sync with backend only if user is authenticated
+        const isAuthenticated = useAuth.getState().isAuthenticated;
+        if (isAuthenticated) {
+          try {
+            await authAPI.updatePreferences(newDarkMode);
+          } catch (error) {
+            console.error('Failed to save theme preference:', error);
+            // Don't revert the theme on error - localStorage still persists it
+          }
         }
       },
     }),
