@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { authAPI } from '../services/api';
 import type { User } from '../types';
 import { useTheme } from './useTheme';
 
@@ -33,6 +34,41 @@ export const useAuth = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => async (state) => {
+        // Verify token exists in localStorage on rehydration
+        const token = localStorage.getItem('token');
+        if (!token && state) {
+          // Token doesn't exist, clear auth state
+          state.user = null;
+          state.token = null;
+          state.isAuthenticated = false;
+          state.isAdmin = false;
+          return;
+        }
+
+        // If token exists, verify it and get a fresh one
+        if (token && state) {
+          try {
+            const response = await authAPI.verifyToken();
+            // Update with fresh token and user data
+            localStorage.setItem('token', response.token);
+            state.token = response.token;
+            state.user = response.user;
+            state.isAuthenticated = true;
+            state.isAdmin = response.user.role === 'admin';
+            // Sync theme with user's preference
+            useTheme.getState().setTheme(response.user.dark_mode);
+          } catch (error) {
+            // Token is invalid, clear auth state
+            console.error('Token verification failed:', error);
+            localStorage.removeItem('token');
+            state.user = null;
+            state.token = null;
+            state.isAuthenticated = false;
+            state.isAdmin = false;
+          }
+        }
+      },
     },
   ),
 );

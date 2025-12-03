@@ -180,3 +180,37 @@ export const changePassword = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const verifyToken = async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const user = await UserModel.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    // Generate a new token to renew the session
+    const token = await generateToken({
+      userId: user.id,
+      username: user.username,
+      role: user.role,
+    });
+
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        dark_mode: user.dark_mode ?? true,
+      },
+    });
+  } catch (error) {
+    console.error('Verify token error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
