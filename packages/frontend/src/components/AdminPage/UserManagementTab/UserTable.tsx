@@ -52,9 +52,8 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
                       onClick={() => onDeleteClick(user.id, user.username, user.role)}
                       size="sm"
                       isDisabled={isLastAdmin}
-                    >
-                      Delete
-                    </Button>
+                      aria-label="Delete"
+                    />
                   </Td>
                 </Tr>
               );
@@ -104,10 +103,9 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
                       icon={<TrashIcon />}
                       onClick={() => onDeleteClick(user.id, user.username, user.role)}
                       isDisabled={isLastAdmin}
-                      isBlock
-                    >
-                      Delete
-                    </Button>
+                      size="sm"
+                      aria-label="Delete"
+                    />
                   </FlexItem>
                 </Flex>
               </CardBody>
