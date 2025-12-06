@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import {
   createUser,
+  deleteAllOTPs,
   deleteBulkOTPs,
   deleteOTP,
   deleteUser,
@@ -28,6 +29,7 @@ router.post('/otp/file', upload.single('file') as any, importOTPsFromFile);
 router.get('/otp', getAllOTPs);
 router.delete('/otp/:id', deleteOTP);
 router.post('/otp/bulk/delete', deleteBulkOTPs);
+router.post('/otp/bulk/delete-all', deleteAllOTPs);
 router.post('/otp/bulk/mark-used', markBulkOTPsAsUsed);
 router.post('/otp/bulk/mark-unused', markBulkOTPsAsUnused);
 

@@ -117,3 +117,15 @@ export const useMarkOTPAsUnused = () => {
     },
   });
 };
+
+export const useDeleteAllOTPs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => adminAPI.deleteAllOTPs(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['otps'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-otps'] });
+    },
+  });
+};

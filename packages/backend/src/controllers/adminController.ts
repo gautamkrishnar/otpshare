@@ -383,3 +383,17 @@ export const markBulkOTPsAsUnused = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const deleteAllOTPs = async (_req: AuthRequest, res: Response) => {
+  try {
+    const deletedCount = await OTPModel.deleteAll();
+
+    res.json({
+      message: `${deletedCount} OTP(s) deleted successfully`,
+      count: deletedCount,
+    });
+  } catch (error) {
+    console.error('Delete all OTPs error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

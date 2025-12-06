@@ -175,6 +175,11 @@ export class OTPModel {
     return result.rowsAffected;
   }
 
+  static async deleteAll(): Promise<number> {
+    const result = await db.delete(otps);
+    return result.rowsAffected;
+  }
+
   static async markBulkAsUsed(ids: number[], userId: number): Promise<number> {
     if (ids.length === 0) return 0;
 

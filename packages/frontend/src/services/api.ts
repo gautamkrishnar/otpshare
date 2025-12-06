@@ -163,6 +163,11 @@ export const adminAPI = {
     return data;
   },
 
+  deleteAllOTPs: async (): Promise<{ count: number }> => {
+    const { data } = await api.post('/admin/otp/bulk/delete-all');
+    return data;
+  },
+
   downloadBackup: async (): Promise<void> => {
     const response = await api.get('/admin/backup', { responseType: 'blob' });
     const url = window.URL.createObjectURL(new Blob([response.data]));
