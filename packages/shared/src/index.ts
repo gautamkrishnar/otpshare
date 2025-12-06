@@ -59,7 +59,13 @@ export interface OTPStats {
 
 export interface AdminOTPResponse {
   otps: OTPWithUser[];
+  total: number;
   stats: OTPStats;
+}
+
+export interface UsersResponse {
+  users: UserWithDates[];
+  total: number;
 }
 
 // Auth types

@@ -13,6 +13,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalVariant,
+  Pagination,
   Spinner,
   Toolbar,
   ToolbarContent,
@@ -44,10 +45,6 @@ const deleteUserSchema = Yup.object({
 });
 
 export const UserManagementTab = () => {
-  const { data, isLoading, error } = useUsers();
-  const createUser = useCreateUser();
-  const deleteUser = useDeleteUser();
-
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<{
@@ -55,6 +52,20 @@ export const UserManagementTab = () => {
     username: string;
     role: string;
   } | null>(null);
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  const { data, isLoading, error } = useUsers({ page, perPage });
+  const createUser = useCreateUser();
+  const deleteUser = useDeleteUser();
+
+  const perPageOptions = [
+    { title: '10', value: 10 },
+    { title: '50', value: 50 },
+    { title: '100', value: 100 },
+  ];
+
+  const totalItems = data?.total ?? 0;
 
   const handleDeleteClick = (id: number, username: string, role: string) => {
     // Check if this is the last admin
@@ -89,7 +100,7 @@ export const UserManagementTab = () => {
             </div>
           ) : error ? (
             <Alert variant="danger" title="Error loading users" />
-          ) : data?.users.length === 0 ? (
+          ) : totalItems === 0 ? (
             <div style={{ padding: '2rem' }}>
               <EmptyState variant="lg" titleText="No users found">
                 <EmptyStateBody>
@@ -105,7 +116,23 @@ export const UserManagementTab = () => {
               </EmptyState>
             </div>
           ) : (
-            <UserTable users={data?.users ?? []} onDeleteClick={handleDeleteClick} />
+            <>
+              <UserTable users={data?.users ?? []} onDeleteClick={handleDeleteClick} />
+              {totalItems > 0 && (
+                <Pagination
+                  itemCount={totalItems}
+                  perPage={perPage}
+                  page={page}
+                  perPageOptions={perPageOptions}
+                  onSetPage={(_event, newPage) => setPage(newPage)}
+                  onPerPageSelect={(_event, newPerPage) => {
+                    setPerPage(newPerPage);
+                    setPage(1);
+                  }}
+                  variant="bottom"
+                />
+              )}
+            </>
           )}
         </CardBody>
       </Card>

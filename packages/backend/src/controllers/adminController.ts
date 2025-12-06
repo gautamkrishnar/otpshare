@@ -66,9 +66,14 @@ export const importOTPsFromFile = async (req: AuthRequest, res: Response) => {
 
 export const getAllOTPs = async (req: AuthRequest, res: Response) => {
   try {
-    const { status, search } = req.query;
+    const { status, search, page, perPage } = req.query;
 
-    const filters: { status?: 'used' | 'unused'; search?: string } = {};
+    const filters: {
+      status?: 'used' | 'unused';
+      search?: string;
+      page?: number;
+      perPage?: number;
+    } = {};
 
     if (status === 'used' || status === 'unused') {
       filters.status = status;
@@ -78,11 +83,26 @@ export const getAllOTPs = async (req: AuthRequest, res: Response) => {
       filters.search = search.trim();
     }
 
-    const otps = await OTPModel.findAll(filters);
+    if (typeof page === 'string') {
+      const pageNum = Number.parseInt(page, 10);
+      if (!Number.isNaN(pageNum) && pageNum > 0) {
+        filters.page = pageNum;
+      }
+    }
+
+    if (typeof perPage === 'string') {
+      const perPageNum = Number.parseInt(perPage, 10);
+      if (!Number.isNaN(perPageNum) && perPageNum > 0 && perPageNum <= 100) {
+        filters.perPage = perPageNum;
+      }
+    }
+
+    const { data: otps, total } = await OTPModel.findAll(filters);
     const stats = await OTPModel.getStats();
 
     res.json({
       otps,
+      total,
       stats,
     });
   } catch (error) {
@@ -125,9 +145,27 @@ export const createUser = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getUsers = async (_req: AuthRequest, res: Response) => {
+export const getUsers = async (req: AuthRequest, res: Response) => {
   try {
-    const users = await UserModel.findAll();
+    const { page, perPage } = req.query;
+
+    const filters: { page?: number; perPage?: number } = {};
+
+    if (typeof page === 'string') {
+      const pageNum = Number.parseInt(page, 10);
+      if (!Number.isNaN(pageNum) && pageNum > 0) {
+        filters.page = pageNum;
+      }
+    }
+
+    if (typeof perPage === 'string') {
+      const perPageNum = Number.parseInt(perPage, 10);
+      if (!Number.isNaN(perPageNum) && perPageNum > 0 && perPageNum <= 100) {
+        filters.perPage = perPageNum;
+      }
+    }
+
+    const { data: users, total } = await UserModel.findAll(filters);
 
     const sanitizedUsers = users.map((user) => ({
       id: user.id,
@@ -137,7 +175,7 @@ export const getUsers = async (_req: AuthRequest, res: Response) => {
       updated_at: user.updated_at,
     }));
 
-    res.json({ users: sanitizedUsers });
+    res.json({ users: sanitizedUsers, total });
   } catch (error) {
     console.error('Get users error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -198,7 +236,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     }
 
     if (user.role === 'admin') {
-      const allUsers = await UserModel.findAll();
+      const { data: allUsers } = await UserModel.findAll();
       const adminCount = allUsers.filter((u) => u.role === 'admin').length;
 
       if (adminCount <= 1) {

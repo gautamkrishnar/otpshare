@@ -7,6 +7,7 @@ import type {
   ParserMetadata,
   UpdateUserInput,
   UserData,
+  UsersResponse,
 } from '../types';
 
 const api = axios.create({
@@ -117,13 +118,15 @@ export const adminAPI = {
   getAllOTPs: async (filters?: {
     status?: 'used' | 'unused';
     search?: string;
+    page?: number;
+    perPage?: number;
   }): Promise<AdminOTPResponse> => {
     const { data } = await api.get('/admin/otp', { params: filters });
     return data;
   },
 
-  getUsers: async (): Promise<{ users: UserData[] }> => {
-    const { data } = await api.get('/admin/users');
+  getUsers: async (filters?: { page?: number; perPage?: number }): Promise<UsersResponse> => {
+    const { data } = await api.get('/admin/users', { params: filters });
     return data;
   },
 

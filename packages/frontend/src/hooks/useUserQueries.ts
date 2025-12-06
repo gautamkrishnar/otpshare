@@ -2,10 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { adminAPI } from '../services/api';
 import type { CreateUserInput, UpdateUserInput } from '../types';
 
-export const useUsers = () => {
+export const useUsers = (filters?: { page?: number; perPage?: number }) => {
   return useQuery({
-    queryKey: ['users'],
-    queryFn: adminAPI.getUsers,
+    queryKey: ['users', filters],
+    queryFn: () => adminAPI.getUsers(filters),
   });
 };
 

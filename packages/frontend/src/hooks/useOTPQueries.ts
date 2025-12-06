@@ -21,7 +21,12 @@ export const useMarkOTPAsUsed = () => {
   });
 };
 
-export const useAdminOTPs = (filters?: { status?: 'used' | 'unused'; search?: string }) => {
+export const useAdminOTPs = (filters?: {
+  status?: 'used' | 'unused';
+  search?: string;
+  page?: number;
+  perPage?: number;
+}) => {
   return useQuery({
     queryKey: ['admin-otps', filters],
     queryFn: () => adminAPI.getAllOTPs(filters),

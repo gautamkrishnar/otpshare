@@ -1,4 +1,4 @@
-import { Card, CardBody, CardTitle } from '@patternfly/react-core';
+import { Card, CardBody, CardTitle, Pagination } from '@patternfly/react-core';
 import type { FormikProps } from 'formik';
 import { useRef, useState } from 'react';
 import {
@@ -27,10 +27,14 @@ export const OTPManagementTab = () => {
   const [vendorType, setVendorType] = useState<VendorType>(VendorType.TPLINK_OMADA);
   const [isVendorSelectOpen, setIsVendorSelectOpen] = useState(false);
   const [selectedOTPs, setSelectedOTPs] = useState<Set<number>>(new Set());
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
   const { data, isLoading, error } = useAdminOTPs({
     status: statusFilter,
     search: searchTerm || undefined,
+    page,
+    perPage,
   });
   const importOTPs = useImportOTPs();
   const importOTPsFromFile = useImportOTPsFromFile();
@@ -106,6 +110,14 @@ export const OTPManagementTab = () => {
   const isAllSelected =
     data?.otps && data.otps.length > 0 && selectedOTPs.size === data.otps.length;
 
+  const perPageOptions = [
+    { title: '10', value: 10 },
+    { title: '50', value: 50 },
+    { title: '100', value: 100 },
+  ];
+
+  const totalItems = data?.total ?? 0;
+
   return (
     <>
       <Card>
@@ -151,6 +163,21 @@ export const OTPManagementTab = () => {
             isMarkingAsUnused={markOTPAsUnused.isPending}
             isDeleting={deleteOTP.isPending}
           />
+
+          {totalItems > 0 && (
+            <Pagination
+              itemCount={totalItems}
+              perPage={perPage}
+              page={page}
+              perPageOptions={perPageOptions}
+              onSetPage={(_event, newPage) => setPage(newPage)}
+              onPerPageSelect={(_event, newPerPage) => {
+                setPerPage(newPerPage);
+                setPage(1);
+              }}
+              variant="bottom"
+            />
+          )}
         </CardBody>
       </Card>
 

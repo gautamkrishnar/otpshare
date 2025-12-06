@@ -37,9 +37,27 @@ export class UserModel {
     return result[0] as User | undefined;
   }
 
-  static async findAll(): Promise<User[]> {
-    const result = await db.select().from(users).orderBy(users.created_at);
-    return result as User[];
+  static async findAll(filters?: {
+    page?: number;
+    perPage?: number;
+  }): Promise<{ data: User[]; total: number }> {
+    // Get total count
+    const countResult = await db.select({ count: sql<number>`count(*)` }).from(users);
+    const total = countResult[0].count;
+
+    // Get paginated data
+    const page = filters?.page ?? 1;
+    const perPage = filters?.perPage ?? 10;
+    const offset = (page - 1) * perPage;
+
+    const result = await db
+      .select()
+      .from(users)
+      .orderBy(users.created_at)
+      .limit(perPage)
+      .offset(offset);
+
+    return { data: result as User[], total };
   }
 
   static async update(id: number, input: UpdateUserInput): Promise<User | undefined> {

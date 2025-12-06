@@ -9,6 +9,7 @@ export type {
   OTPListResponse,
   OTPStats,
   AdminOTPResponse,
+  UsersResponse,
   LoginResponse,
   ParserMetadata,
 } from '@otpshare/shared';

@@ -18,7 +18,7 @@ const setup = async () => {
 
   await initializeDatabase();
 
-  const existingUsers = await UserModel.findAll();
+  const { data: existingUsers } = await UserModel.findAll();
 
   if (existingUsers.length > 0) {
     console.log('Users already exist in the database.');

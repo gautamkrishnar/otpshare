@@ -69,7 +69,9 @@ export class OTPModel {
   static async findAll(filters?: {
     status?: 'used' | 'unused';
     search?: string;
-  }): Promise<OTPWithUser[]> {
+    page?: number;
+    perPage?: number;
+  }): Promise<{ data: OTPWithUser[]; total: number }> {
     const conditions = [];
 
     if (filters?.status) {
@@ -79,6 +81,20 @@ export class OTPModel {
     if (filters?.search) {
       conditions.push(like(otps.code, `%${filters.search}%`));
     }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // Get total count
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(otps)
+      .where(whereClause);
+    const total = countResult[0].count;
+
+    // Get paginated data
+    const page = filters?.page ?? 1;
+    const perPage = filters?.perPage ?? 10;
+    const offset = (page - 1) * perPage;
 
     const result = await db
       .select({
@@ -95,10 +111,12 @@ export class OTPModel {
       .from(otps)
       .leftJoin(createdByUser, eq(otps.created_by, createdByUser.id))
       .leftJoin(usedByUser, eq(otps.used_by, usedByUser.id))
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(desc(otps.created_at), desc(otps.id));
+      .where(whereClause)
+      .orderBy(desc(otps.created_at), desc(otps.id))
+      .limit(perPage)
+      .offset(offset);
 
-    return result as OTPWithUser[];
+    return { data: result as OTPWithUser[], total };
   }
 
   static async markAsUsed(id: number, userId: number): Promise<OTP | undefined> {
