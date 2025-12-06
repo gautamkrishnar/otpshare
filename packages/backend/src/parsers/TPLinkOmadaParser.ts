@@ -1,4 +1,17 @@
+import { Readable } from 'node:stream';
+import csv from 'csv-parser';
 import type { OTPParser } from './types';
+
+interface OmadaVoucherRow {
+  Code: string;
+  Type: string;
+  Duration: string;
+  'Start Time': string;
+  'Expire Time': string;
+  'MAC Address': string;
+  'Multi-Login': string;
+  Note: string;
+}
 
 export class TPLinkOmadaParser implements OTPParser {
   name = 'TP-Link Omada';
@@ -20,39 +33,44 @@ Note: The parser will automatically extract the voucher codes from the first col
 
   async parse(data: Buffer): Promise<string[]> {
     try {
-      // Convert buffer to string
-      const text = data.toString('utf-8');
+      return new Promise((resolve, reject) => {
+        const stream = Readable.from(data);
+        const rows: OmadaVoucherRow[] = [];
 
-      // Split into lines
-      const lines = text.split('\n');
+        stream
+          .pipe(csv())
+          .on('data', (row: OmadaVoucherRow) => {
+            rows.push(row);
+          })
+          .on('end', () => {
+            const codes: string[] = [];
 
-      // Skip the header line and process data lines
-      const codes: string[] = [];
+            for (const row of rows) {
+              // Get the Code and Type columns by header name
+              const code = row.Code?.trim();
+              const voucherType = row.Type?.trim().toLowerCase();
 
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
+              if (code) {
+                // Validate that it's a valid code (6-8 digits based on typical Omada voucher format)
+                if (/^\d{6,8}$/.test(code)) {
+                  // Skip if the voucher type is "Expired"
+                  const isExpired = voucherType === 'expired';
 
-        // Skip empty lines
-        if (!line) continue;
+                  if (!isExpired) {
+                    codes.push(code);
+                  }
+                }
+              }
+            }
 
-        // Parse CSV line - the code is in the first column
-        // Handle quoted values
-        const match = line.match(/^"?([^",]+)"?/);
-
-        if (match?.[1]) {
-          const code = match[1].trim();
-
-          // Validate that it's a valid code (6-8 digits based on typical Omada voucher format)
-          if (/^\d{6,8}$/.test(code)) {
-            codes.push(code);
-          }
-        }
-      }
-
-      // Remove duplicates
-      const uniqueCodes = [...new Set(codes)];
-
-      return uniqueCodes;
+            // Remove duplicates
+            const uniqueCodes = [...new Set(codes)];
+            resolve(uniqueCodes);
+          })
+          .on('error', (error: Error) => {
+            reject(new Error(`Failed to parse TP-Link Omada CSV: ${error.message}`));
+          });
+      });
     } catch (error) {
       throw new Error(
         `Failed to parse TP-Link Omada CSV: ${error instanceof Error ? error.message : 'Unknown error'}`,

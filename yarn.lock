@@ -2688,6 +2688,7 @@ __metadata:
     "@vitest/ui": "npm:^2.1.8"
     bcrypt: "npm:^5.1.1"
     cors: "npm:^2.8.5"
+    csv-parser: "npm:^3.2.0"
     dotenv: "npm:^16.3.1"
     drizzle-kit: "npm:^0.31.7"
     drizzle-orm: "npm:^0.44.7"
@@ -4795,6 +4796,15 @@ __metadata:
   version: 3.2.3
   resolution: "csstype@npm:3.2.3"
   checksum: cd29c51e70fa822f1cecd8641a1445bed7063697469d35633b516e60fe8c1bde04b08f6c5b6022136bb669b64c63d4173af54864510fbb4ee23281801841a3ce
+  languageName: node
+  linkType: hard
+
+"csv-parser@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "csv-parser@npm:3.2.0"
+  bin:
+    csv-parser: bin/csv-parser
+  checksum: 650769916607dae9679187803c71ef70d3b724cfb18e4adff187167b282faf18ac7c14a318c4ea6e92ae3483d3ed4b8d92ff213e77979e3049a5c0029034ac65
   languageName: node
   linkType: hard
 

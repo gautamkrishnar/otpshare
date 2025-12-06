@@ -186,5 +186,69 @@ describe('TPLinkOmadaParser', () => {
       const codes = await parser.parse(invalidBuffer);
       expect(codes).toEqual([]);
     });
+
+    it('should skip expired vouchers', async () => {
+      const csvData = `Code,Type,Duration
+"123456","Unused","8.0Hours"
+"234567","Expired","8.0Hours"
+"345678","Unused","8.0Hours"`;
+
+      const buffer = Buffer.from(csvData, 'utf-8');
+      const codes = await parser.parse(buffer);
+
+      expect(codes).toEqual(['123456', '345678']);
+    });
+
+    it('should handle Type column case-insensitively', async () => {
+      const csvData = `Code,Type,Duration
+"123456","EXPIRED","8.0Hours"
+"234567","expired","8.0Hours"
+"345678","Expired","8.0Hours"
+"456789","Unused","8.0Hours"`;
+
+      const buffer = Buffer.from(csvData, 'utf-8');
+      const codes = await parser.parse(buffer);
+
+      expect(codes).toEqual(['456789']);
+    });
+
+    it('should handle mixed expired and unused vouchers', async () => {
+      const csvData = `Code,Type,Duration,Effective Time,Expiration Time
+"045386","Unused","8.0Hours","Dec 01 2025 12:00:00 AM","Dec 01 2026 11:59:59 PM"
+"234253","Expired","8.0Hours","Dec 01 2024 12:00:00 AM","Dec 01 2025 11:59:59 PM"
+"284378","Unused","8.0Hours","Dec 01 2025 12:00:00 AM","Dec 01 2026 11:59:59 PM"
+"219062","Expired","8.0Hours","Dec 01 2024 12:00:00 AM","Dec 01 2025 11:59:59 PM"
+"215752","Unused","8.0Hours","Dec 01 2025 12:00:00 AM","Dec 01 2026 11:59:59 PM"`;
+
+      const buffer = Buffer.from(csvData, 'utf-8');
+      const codes = await parser.parse(buffer);
+
+      expect(codes).toEqual(['045386', '284378', '215752']);
+    });
+
+    it('should return empty array when all vouchers are expired', async () => {
+      const csvData = `Code,Type,Duration
+"123456","Expired","8.0Hours"
+"234567","Expired","8.0Hours"
+"345678","Expired","8.0Hours"`;
+
+      const buffer = Buffer.from(csvData, 'utf-8');
+      const codes = await parser.parse(buffer);
+
+      expect(codes).toEqual([]);
+    });
+
+    it('should handle Type column with other values', async () => {
+      const csvData = `Code,Type,Duration
+"123456","Valid for Multi-Use (1 time at most)","8.0Hours"
+"234567","Expired","8.0Hours"
+"345678","Valid for Single-Use","8.0Hours"`;
+
+      const buffer = Buffer.from(csvData, 'utf-8');
+      const codes = await parser.parse(buffer);
+
+      // Should include all non-expired vouchers regardless of Type value
+      expect(codes).toEqual(['123456', '345678']);
+    });
   });
 });
