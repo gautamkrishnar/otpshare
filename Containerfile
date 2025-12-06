@@ -1,7 +1,7 @@
 # ==========================================
 # Stage 1: Base (Tools & Config)
 # ==========================================
-FROM node:20-alpine AS base
+FROM node:20-bookworm-slim AS base
 # Enable Yarn 4
 RUN corepack enable && corepack prepare yarn@4.0.2 --activate
 WORKDIR /app
@@ -11,8 +11,11 @@ WORKDIR /app
 # ==========================================
 FROM base AS builder
 # Install build tools for native modules (needed for installation)
-# Use --no-scripts to avoid QEMU ARM emulation issues with busybox triggers
-RUN apk add --no-cache --no-scripts python3 make g++
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # 1. Copy ONLY dependency definitions first (Better caching)
 #    Copy root files and package.json files from workspaces
@@ -23,23 +26,36 @@ COPY packages/backend/package.json ./packages/backend/package.json
 COPY packages/frontend/package.json ./packages/frontend/package.json
 
 # 2. Install ALL dependencies (frozen lockfile)
-RUN yarn install --immutable
+# Skip building native modules here - we only need them for the JS build
+# Native modules will be properly built in the prod-deps stage
+RUN yarn install --immutable --mode=skip-build
 
 # 3. Copy source code
-COPY . .
+COPY packages ./packages
 
 # 4. Build the bundle
 #    (Ensure your backend package.json script "build" runs "vite build")
 RUN yarn build
 
+# 5. Create data directory for SQLite database
+RUN mkdir -p /app/data
+
 # ==========================================
-# Stage 3: Production Native Modules
+# Stage 3: Production Native Modules (Debian)
 # ==========================================
 # We create a fresh stage to install ONLY production dependencies.
-# This ensures we get fresh, clean native binaries for the backend.
-FROM base AS prod-deps
-# Use --no-scripts to avoid QEMU ARM emulation issues with busybox triggers
-RUN apk add --no-cache --no-scripts python3 make g++
+# This ensures we get fresh, clean native binaries compatible with distroless (Debian-based).
+FROM node:20-bookworm-slim AS prod-deps
+# Enable Yarn 4
+RUN corepack enable && corepack prepare yarn@4.0.2 --activate
+# Install build tools for native modules
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
 
 COPY --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
 COPY --from=builder /app/.yarn ./.yarn
@@ -47,14 +63,14 @@ COPY --from=builder /app/packages/shared ./packages/shared
 COPY --from=builder /app/packages/backend/package.json ./packages/backend/package.json
 
 # Focus ONLY on backend production deps
-# This generates a clean node_modules with bcrypt/sqlite3 binaries
+# This generates a clean node_modules with bcrypt/sqlite3 binaries compatible with Debian
 WORKDIR /app/packages/backend
 RUN yarn workspaces focus --production
 
 # ==========================================
-# Stage 4: Production Runner
+# Stage 4: Production Runner (Distroless)
 # ==========================================
-FROM node:20-alpine AS production
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS production
 
 # OCI Image Metadata Labels (https://github.com/opencontainers/image-spec/blob/main/annotations.md)
 LABEL org.opencontainers.image.title="OTPShare" \
@@ -63,7 +79,7 @@ LABEL org.opencontainers.image.title="OTPShare" \
       org.opencontainers.image.url="https://github.com/gautamkrishnar/otpshare" \
       org.opencontainers.image.source="https://github.com/gautamkrishnar/otpshare" \
       org.opencontainers.image.documentation="https://github.com/gautamkrishnar/otpshare/wiki" \
-      org.opencontainers.image.base.name="docker.io/library/node:20-alpine" \
+      org.opencontainers.image.base.name="gcr.io/distroless/nodejs20-debian12:nonroot" \
       org.opencontainers.image.ref.name="latest" \
       org.label-schema.schema-version="1.0" \
       org.label-schema.name="OTPShare" \
@@ -75,29 +91,21 @@ LABEL org.opencontainers.image.title="OTPShare" \
       app.component="otp-manager" \
       app.part-of="otpshare-monorepo"
 
-# Install dumb-init (workaround for QEMU ARM emulation issue with busybox triggers)
-RUN apk add --no-cache --no-scripts dumb-init || \
-    (apk add --no-cache --allow-untrusted dumb-init 2>/dev/null || \
-    apk add --no-cache dumb-init)
-
 WORKDIR /app
 
 # 1. Copy the Bundled JS (Your code)
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
 COPY --from=builder /app/packages/frontend/dist ./packages/frontend/dist
 
-# 2. Copy the Native Modules (External deps)
-#    We copy the ENTIRE node_modules folder from the specific workspace
-#    This guarantees we don't miss hidden dependencies.
+# 2. Copy the healthcheck script
+COPY --from=builder /app/packages/backend/healthcheck.js ./packages/backend/healthcheck.js
+
+# 3. Copy the Native Modules (External deps)
 COPY --from=prod-deps /app/node_modules ./node_modules
 
-# 3. Verify migrations were copied (debug step)
-RUN ls -la ./packages/backend/dist/db/migrations/ || echo "Migrations folder missing!"
-
-# 4. Setup SQLite Data Directory
-RUN mkdir -p /app/data && chown -R node:node /app
-
-USER node
+# 4. Setup SQLite Data Directory and create data volume with proper permissions
+COPY --from=builder --chown=nonroot:nonroot /app/packages/backend/dist/db/migrations ./packages/backend/dist/db/migrations
+COPY --from=builder --chown=nonroot:nonroot /app/data ./data
 
 ENV NODE_ENV=production \
     PORT=3001 \
@@ -105,11 +113,8 @@ ENV NODE_ENV=production \
 
 EXPOSE 3001
 
+# Healthcheck using exec form with dedicated script (compatible with distroless)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "import('http').then(http => http.default.get('http://localhost:3001/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)))"
+  CMD ["/nodejs/bin/node", "packages/backend/healthcheck.js"]
 
-ENTRYPOINT ["dumb-init", "--"]
-
-# Note: Since we copied node_modules to the root /app/node_modules,
-# Node will find them automatically when running the script.
-CMD ["node", "packages/backend/dist/index.js"]
+CMD ["packages/backend/dist/index.js"]

@@ -1,51 +1,83 @@
-# Dependencies
-node_modules
+# Dependencies - ignore at all levels
+**/node_modules
+node_modules/
 .pnp
 .pnp.js
-packages/*/node_modules
 
 # Testing
 coverage
+**/coverage
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+**/__tests__
+**/__mocks__
 
 # Production builds (will be built in Docker)
-packages/*/dist
+**/dist
+dist/
+build/
 
 # Misc
 .DS_Store
+**/.DS_Store
 *.log
+**/*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity
 
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/
+**/.vscode/
+**/.idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 
-# Environment files
+# Environment files - ignore all variants
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+**/.env
+**/.env.*
+# Whitelist example files
+!.env.example
+!**/.env.example
 
 # Git
 .git
 .gitignore
 
 # Database
-data
+data/
+**/data
 *.db
 *.db-shm
 *.db-wal
+*.sqlite
+*.sqlite3
 
 # Yarn
-.yarn/cache
-.yarn/unplugged
+.yarn/cache/
+.yarn/unplugged/
 .yarn/build-state.yml
 .yarn/install-state.gz
+**/.yarn/cache/
+**/.yarn/unplugged/
 
 # Container files
 Containerfile
@@ -56,5 +88,19 @@ docker-compose.yml
 
 # Documentation
 README.md
-docs
-*.md
+docs/
+**/*.md
+!packages/*/README.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Temporary files
+tmp/
+temp/
+**/tmp
+**/temp
+*.tmp

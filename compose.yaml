@@ -6,6 +6,7 @@ services:
     image: ghcr.io/gautamkrishnar/otpshare:latest
     container_name: otpshare
     restart: unless-stopped
+    user: "65532:65532"  # uid and gid for production distroless image
     ports:
       - "${EXTERNAL_PORT:-3001}:3001"
     env_file:
