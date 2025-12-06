@@ -19,6 +19,22 @@
 
 OTP Manager is a self-hosted, enterprise-ready solution for managing and distributing one-time passwords across your organization. Whether you're managing guest WiFi access, temporary credentials, event passes, or service vouchers, OTP Manager provides a secure, efficient, and user-friendly platform for OTP lifecycle management.
 
+## Screenshots
+### Mobile
+<div align="center">
+<img src="https://github.com/user-attachments/assets/e8bc0a01-870d-42a2-82b8-48ce176e23fb" width="33.33%">
+<img src="https://github.com/user-attachments/assets/27678eb9-2004-4894-8fc4-666513ab9c4f" width="33.33%">
+<img src="https://github.com/user-attachments/assets/95988a1e-888f-4de2-b0f6-ca9a2a5e0709" width="33.33%">
+</div>
+
+### Desktop
+
+<div align="center">
+<img src="https://github.com/user-attachments/assets/db42dbf5-caa3-4a4d-a208-43393116ff7e" width="33.33%"/>
+<img src="https://github.com/user-attachments/assets/21cc5766-652f-4707-a270-bf3546fd0e80" width="33.33%"/>
+<img src="https://github.com/user-attachments/assets/f5536845-03be-4735-bc3c-a90763bffa4d" width="33.33%" />
+</div>
+
 ## Features
 
 - **📱 Progressive Web App** - Installable on any platform (iOS, Android, Windows, macOS, Linux)
