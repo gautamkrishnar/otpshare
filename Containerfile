@@ -56,6 +56,25 @@ RUN yarn workspaces focus --production
 # ==========================================
 FROM node:20-alpine AS production
 
+# OCI Image Metadata Labels (https://github.com/opencontainers/image-spec/blob/main/annotations.md)
+LABEL org.opencontainers.image.title="OTPShare" \
+      org.opencontainers.image.description="A secure and user-friendly OTP manager for storing and sharing time-based one-time passwords. Self-hosted solution with web interface, pagination, and automatic expiry filtering." \
+      org.opencontainers.image.licenses="AGPL-3.0" \
+      org.opencontainers.image.url="https://github.com/gautamkrishnar/otpshare" \
+      org.opencontainers.image.source="https://github.com/gautamkrishnar/otpshare" \
+      org.opencontainers.image.documentation="https://github.com/gautamkrishnar/otpshare/wiki" \
+      org.opencontainers.image.base.name="docker.io/library/node:20-alpine" \
+      org.opencontainers.image.ref.name="latest" \
+      org.label-schema.schema-version="1.0" \
+      org.label-schema.name="OTPShare" \
+      org.label-schema.description="A secure and user-friendly OTP manager for storing and sharing time-based one-time passwords" \
+      org.label-schema.url="https://github.com/gautamkrishnar/otpshare" \
+      org.label-schema.vcs-url="https://github.com/gautamkrishnar/otpshare" \
+      org.label-schema.vendor="Gautam Krishna R" \
+      app.name="otpshare" \
+      app.component="otp-manager" \
+      app.part-of="otpshare-monorepo"
+
 # Install dumb-init (workaround for QEMU ARM emulation issue with busybox triggers)
 RUN apk add --no-cache --no-scripts dumb-init || \
     (apk add --no-cache --allow-untrusted dumb-init 2>/dev/null || \
