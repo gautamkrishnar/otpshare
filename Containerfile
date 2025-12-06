@@ -11,7 +11,8 @@ WORKDIR /app
 # ==========================================
 FROM base AS builder
 # Install build tools for native modules (needed for installation)
-RUN apk add --no-cache python3 make g++
+# Use --no-scripts to avoid QEMU ARM emulation issues with busybox triggers
+RUN apk add --no-cache --no-scripts python3 make g++
 
 # 1. Copy ONLY dependency definitions first (Better caching)
 #    Copy root files and package.json files from workspaces
@@ -37,7 +38,8 @@ RUN yarn build
 # We create a fresh stage to install ONLY production dependencies.
 # This ensures we get fresh, clean native binaries for the backend.
 FROM base AS prod-deps
-RUN apk add --no-cache python3 make g++
+# Use --no-scripts to avoid QEMU ARM emulation issues with busybox triggers
+RUN apk add --no-cache --no-scripts python3 make g++
 
 COPY --from=builder /app/package.json /app/yarn.lock /app/.yarnrc.yml ./
 COPY --from=builder /app/.yarn ./.yarn
@@ -54,8 +56,10 @@ RUN yarn workspaces focus --production
 # ==========================================
 FROM node:20-alpine AS production
 
-# Install dumb-init
-RUN apk add --no-cache dumb-init
+# Install dumb-init (workaround for QEMU ARM emulation issue with busybox triggers)
+RUN apk add --no-cache --no-scripts dumb-init || \
+    (apk add --no-cache --allow-untrusted dumb-init 2>/dev/null || \
+    apk add --no-cache dumb-init)
 
 WORKDIR /app
 
