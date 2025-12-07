@@ -65,7 +65,9 @@ jobs:
           cache-from: type=gha,scope=master-${{ steps.platform.outputs.safe }}
           cache-to: type=gha,mode=max,scope=master-${{ steps.platform.outputs.safe }}
           platforms: ${{ matrix.platform }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true,oci-mediatypes=true
+          provenance: false
+          sbom: false
 
       - name: Export digest
         run: |
@@ -88,6 +90,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
 
     steps:
       - name: Download digests
@@ -114,12 +118,51 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=master
+          # Auto-generates: title, description (from repo), licenses, url, source, version, revision, created
+          # Only override description to be more detailed than GitHub repo description
+          labels: |
+            org.opencontainers.image.description=A secure and user-friendly OTP manager for storing and sharing time-based one-time passwords. Self-hosted solution with web interface, pagination, and automatic expiry filtering.
+            org.opencontainers.image.documentation=https://github.com/gautamkrishnar/otpshare/wiki
+          annotations: |
+            org.opencontainers.image.description=A secure and user-friendly OTP manager for storing and sharing time-based one-time passwords. Self-hosted solution with web interface, pagination, and automatic expiry filtering.
+            org.opencontainers.image.documentation=https://github.com/gautamkrishnar/otpshare/wiki
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:%s ' *)
+          # Build the list of digest references
+          digests=""
+          for digest_file in *; do
+            # Skip hidden files and only process valid SHA256 hashes (64 hex chars)
+            [[ "$digest_file" == .* ]] && continue
+            [[ ! "$digest_file" =~ ^[a-f0-9]{64}$ ]] && continue
+            digests+="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:${digest_file} "
+          done
+
+          # Get tags from metadata
+          tags=$(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+
+          # Debug: Show what annotations we have
+          echo "Raw annotations from metadata:"
+          jq -r '.annotations[]' <<< "$DOCKER_METADATA_OUTPUT_JSON"
+
+          # Get annotations from metadata and format them for imagetools
+          # annotations is an array like ["manifest:key=value", "index:key=value"]
+          # imagetools create only supports index: and manifest-descriptor: annotations
+          # Filter to only keep index: annotations, then strip "index:" and format properly
+          annotations=$(jq -cr '.annotations | map(
+            select(startswith("index:")) |
+            sub("^index:"; "") |
+            capture("(?<key>[^=]+)=(?<value>.*)") |
+            "--annotation index:" + .key + "=\"" + .value + "\""
+          ) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+
+          echo "Formatted annotations:"
+          echo "$annotations"
+
+          # Create manifest with all tags, annotations, and digests
+          echo "Running: docker buildx imagetools create $tags $annotations $digests"
+          eval docker buildx imagetools create $tags $annotations $digests
 
       - name: Inspect image
         run: |
