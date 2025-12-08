@@ -111,6 +111,13 @@ jobs:
             changelog="${changelog}### 🧰 Maintenance\n${chores}\n\n"
           fi
 
+          # Add full changelog link
+          previous_tag="${{ steps.get_latest_tag.outputs.latest_tag }}"
+          new_version="${{ steps.calc_version.outputs.new_version }}"
+          if [ "$previous_tag" != "0.0.0" ]; then
+            changelog="${changelog}**Full Changelog**: https://github.com/gautamkrishnar/otpshare/compare/${previous_tag}...${new_version}\n"
+          fi
+
           # Save to file
           echo -e "$changelog" > CHANGELOG.md
           echo "changelog_file=CHANGELOG.md" >> $GITHUB_OUTPUT
