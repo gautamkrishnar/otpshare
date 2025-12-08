@@ -1,0 +1,141 @@
+name: Release Drafter
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+          echo "Latest tag: $latest_tag"
+
+      - name: Get commits since last tag
+        id: get_commits
+        run: |
+          if [ "${{ steps.get_latest_tag.outputs.latest_tag }}" == "0.0.0" ]; then
+            commits=$(git log --pretty=format:"%s" HEAD)
+          else
+            commits=$(git log --pretty=format:"%s" ${{ steps.get_latest_tag.outputs.latest_tag }}..HEAD)
+          fi
+
+          # Check if there are any commits
+          if [ -z "$commits" ]; then
+            echo "bump=none" >> $GITHUB_OUTPUT
+          else
+            # Always bump patch version
+            echo "bump=patch" >> $GITHUB_OUTPUT
+          fi
+
+          echo "$commits" > commits.txt
+
+      - name: Calculate new version
+        id: calc_version
+        run: |
+          current_version="${{ steps.get_latest_tag.outputs.latest_tag }}"
+          bump_type="${{ steps.get_commits.outputs.bump }}"
+
+          if [ "$bump_type" == "none" ]; then
+            echo "No version bump needed"
+            echo "new_version=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Parse version
+          IFS='.' read -ra VERSION <<< "$current_version"
+          major=${VERSION[0]:-0}
+          minor=${VERSION[1]:-0}
+          patch=${VERSION[2]:-0}
+
+          # Bump version
+          if [ "$bump_type" == "major" ]; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif [ "$bump_type" == "minor" ]; then
+            minor=$((minor + 1))
+            patch=0
+          elif [ "$bump_type" == "patch" ]; then
+            patch=$((patch + 1))
+          fi
+
+          new_version="$major.$minor.$patch"
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "New version: $new_version"
+
+      - name: Generate changelog
+        if: steps.calc_version.outputs.new_version != ''
+        id: changelog
+        run: |
+          if [ "${{ steps.get_latest_tag.outputs.latest_tag }}" == "0.0.0" ]; then
+            commits=$(git log --pretty=format:"- %s (%h)" HEAD)
+          else
+            commits=$(git log --pretty=format:"- %s (%h)" ${{ steps.get_latest_tag.outputs.latest_tag }}..HEAD)
+          fi
+
+          # Categorize commits and strip prefixes
+          features=$(echo "$commits" | grep -E "^- feat(\(.*\))?:" | sed -E 's/^- feat(\([^)]*\))?: /- /' || true)
+          fixes=$(echo "$commits" | grep -E "^- fix(\(.*\))?:" | sed -E 's/^- fix(\([^)]*\))?: /- /' || true)
+          chores=$(echo "$commits" | grep -E "^- (chore|ci|build)(\(.*\))?:" | sed -E 's/^- (chore|ci|build)(\([^)]*\))?: /- /' || true)
+          docs=$(echo "$commits" | grep -E "^- docs(\(.*\))?:" | sed -E 's/^- docs(\([^)]*\))?: /- /' || true)
+
+          changelog="## What's Changed\n\n"
+
+          if [ -n "$features" ]; then
+            changelog="${changelog}### 🚀 Features\n${features}\n\n"
+          fi
+
+          if [ -n "$fixes" ]; then
+            changelog="${changelog}### 🐛 Bug Fixes\n${fixes}\n\n"
+          fi
+
+          if [ -n "$docs" ]; then
+            changelog="${changelog}### 📝 Documentation\n${docs}\n\n"
+          fi
+
+          if [ -n "$chores" ]; then
+            changelog="${changelog}### 🧰 Maintenance\n${chores}\n\n"
+          fi
+
+          # Save to file
+          echo -e "$changelog" > CHANGELOG.md
+          echo "changelog_file=CHANGELOG.md" >> $GITHUB_OUTPUT
+
+      - name: Delete existing draft releases
+        if: steps.calc_version.outputs.new_version != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get all draft releases and delete them
+          gh release list --limit 100 | grep "Draft" | awk '{print $3}' | while read -r tag; do
+            echo "Deleting draft release: $tag"
+            gh release delete "$tag" --yes --cleanup-tag || true
+          done
+
+      - name: Create draft release
+        if: steps.calc_version.outputs.new_version != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          new_version="${{ steps.calc_version.outputs.new_version }}"
+
+          # Create draft release (no tag created)
+          gh release create "$new_version" \
+            --draft \
+            --title "$new_version" \
+            --notes-file CHANGELOG.md \
+            --target master
