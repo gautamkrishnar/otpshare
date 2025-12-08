@@ -25,6 +25,8 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
           <Thead>
             <Tr>
               <Th>Username</Th>
+              <Th>Name</Th>
+              <Th>Email</Th>
               <Th>Role</Th>
               <Th>Created At</Th>
               <Th>Updated At</Th>
@@ -38,6 +40,8 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
               return (
                 <Tr key={user.id}>
                   <Td>{user.username}</Td>
+                  <Td>{user.name || '-'}</Td>
+                  <Td>{user.email || '-'}</Td>
                   <Td>
                     <Label isCompact color={user.role === 'admin' ? 'blue' : 'grey'}>
                       {user.role}
@@ -83,6 +87,25 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
                       </FlexItem>
                     </Flex>
                   </FlexItem>
+
+                  {(user.name || user.email) && (
+                    <FlexItem>
+                      <div className={styles.mobileInfo}>
+                        {user.name && (
+                          <div>
+                            <small className={styles.mobileLabel}>Name:</small>
+                            <div>{user.name}</div>
+                          </div>
+                        )}
+                        {user.email && (
+                          <div>
+                            <small className={styles.mobileLabel}>Email:</small>
+                            <div>{user.email}</div>
+                          </div>
+                        )}
+                      </div>
+                    </FlexItem>
+                  )}
 
                   <FlexItem>
                     <div className={styles.mobileInfo}>

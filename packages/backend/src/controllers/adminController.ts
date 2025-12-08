@@ -113,7 +113,7 @@ export const getAllOTPs = async (req: AuthRequest, res: Response) => {
 
 export const createUser = async (req: AuthRequest, res: Response) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password, role, email, name } = req.body;
 
     if (!username || !password || !role) {
       return res.status(400).json({ error: 'Username, password, and role are required' });
@@ -128,7 +128,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
-    const user = await UserModel.create({ username, password, role });
+    const user = await UserModel.create({ username, password, role, email, name });
 
     res.status(201).json({
       message: 'User created successfully',
@@ -136,6 +136,8 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         id: user.id,
         username: user.username,
         role: user.role,
+        email: user.email,
+        name: user.name,
         created_at: user.created_at,
       },
     });
@@ -171,6 +173,8 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
       id: user.id,
       username: user.username,
       role: user.role,
+      email: user.email,
+      name: user.name,
       created_at: user.created_at,
       updated_at: user.updated_at,
     }));
@@ -185,7 +189,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
 export const updateUser = async (req: AuthRequest, res: Response) => {
   try {
     const userId = Number.parseInt(req.params.id);
-    const { username, password, role } = req.body;
+    const { username, password, role, email, name } = req.body;
 
     if (Number.isNaN(userId)) {
       return res.status(400).json({ error: 'Invalid user ID' });
@@ -195,11 +199,19 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Role must be either "admin" or "user"' });
     }
 
-    const updateData: { username?: string; password?: string; role?: 'admin' | 'user' } = {};
+    const updateData: {
+      username?: string;
+      password?: string;
+      role?: 'admin' | 'user';
+      email?: string;
+      name?: string;
+    } = {};
 
     if (username) updateData.username = username;
     if (password) updateData.password = password;
     if (role) updateData.role = role;
+    if (email !== undefined) updateData.email = email;
+    if (name !== undefined) updateData.name = name;
 
     const updatedUser = await UserModel.update(userId, updateData);
 
@@ -213,6 +225,8 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         id: updatedUser.id,
         username: updatedUser.username,
         role: updatedUser.role,
+        email: updatedUser.email,
+        name: updatedUser.name,
         updated_at: updatedUser.updated_at,
       },
     });

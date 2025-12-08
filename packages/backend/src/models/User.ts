@@ -21,6 +21,8 @@ export class UserModel {
         username: input.username,
         password_hash: passwordHash,
         role: input.role,
+        email: input.email,
+        name: input.name,
       })
       .returning();
 
@@ -64,7 +66,7 @@ export class UserModel {
     const user = await UserModel.findById(id);
     if (!user) return undefined;
 
-    const updateData: Record<string, string | number | boolean | SQL> = {
+    const updateData: Record<string, string | number | boolean | SQL | null> = {
       updated_at: sql`(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))`,
     };
 
@@ -82,6 +84,14 @@ export class UserModel {
 
     if (input.dark_mode !== undefined) {
       updateData.dark_mode = input.dark_mode;
+    }
+
+    if (input.email !== undefined) {
+      updateData.email = input.email;
+    }
+
+    if (input.name !== undefined) {
+      updateData.name = input.name;
     }
 
     const result = await db.update(users).set(updateData).where(eq(users.id, id)).returning();

@@ -4,6 +4,8 @@ export interface User {
   username: string;
   role: 'admin' | 'user';
   dark_mode: boolean;
+  email?: string;
+  name?: string;
 }
 
 export interface UserWithDates extends User {
@@ -15,6 +17,8 @@ export interface CreateUserInput {
   username: string;
   password: string;
   role: 'admin' | 'user';
+  email?: string;
+  name?: string;
 }
 
 export interface UpdateUserInput {
@@ -22,6 +26,8 @@ export interface UpdateUserInput {
   password?: string;
   role?: 'admin' | 'user';
   dark_mode?: boolean;
+  email?: string;
+  name?: string;
 }
 
 export interface ChangePasswordInput {
