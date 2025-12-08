@@ -1,5 +1,5 @@
 import { Button, Card, CardBody, Flex, FlexItem, Label } from '@patternfly/react-core';
-import { TrashIcon } from '@patternfly/react-icons';
+import { PencilAltIcon, TrashIcon } from '@patternfly/react-icons';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { format } from 'timeago.js';
 import type { UserData } from '../../../types';
@@ -7,6 +7,7 @@ import styles from './UserTable.module.scss';
 
 interface UserTableProps {
   users: UserData[];
+  onEditClick: (user: UserData) => void;
   onDeleteClick: (id: number, username: string, role: string) => void;
 }
 
@@ -14,7 +15,7 @@ const formatDate = (dateString: string) => {
   return format(dateString);
 };
 
-export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
+export const UserTable = ({ users, onEditClick, onDeleteClick }: UserTableProps) => {
   const adminCount = users.filter((u) => u.role === 'admin').length;
 
   return (
@@ -50,6 +51,14 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
                   <Td>{formatDate(user.created_at)}</Td>
                   <Td>{formatDate(user.updated_at)}</Td>
                   <Td modifier="nowrap">
+                    <Button
+                      variant="primary"
+                      icon={<PencilAltIcon />}
+                      onClick={() => onEditClick(user)}
+                      size="sm"
+                      aria-label="Edit"
+                      style={{ marginRight: '0.5rem' }}
+                    />
                     <Button
                       variant="danger"
                       icon={<TrashIcon />}
@@ -121,14 +130,25 @@ export const UserTable = ({ users, onDeleteClick }: UserTableProps) => {
                   </FlexItem>
 
                   <FlexItem>
-                    <Button
-                      variant="danger"
-                      icon={<TrashIcon />}
-                      onClick={() => onDeleteClick(user.id, user.username, user.role)}
-                      isDisabled={isLastAdmin}
-                      size="sm"
-                      aria-label="Delete"
-                    />
+                    <Flex>
+                      <FlexItem>
+                        <Button
+                          variant="primary"
+                          icon={<PencilAltIcon />}
+                          onClick={() => onEditClick(user)}
+                          aria-label="Edit"
+                        />
+                      </FlexItem>
+                      <FlexItem>
+                        <Button
+                          variant="danger"
+                          icon={<TrashIcon />}
+                          onClick={() => onDeleteClick(user.id, user.username, user.role)}
+                          isDisabled={isLastAdmin}
+                          aria-label="Delete"
+                        />
+                      </FlexItem>
+                    </Flex>
                   </FlexItem>
                 </Flex>
               </CardBody>

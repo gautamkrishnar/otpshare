@@ -21,8 +21,13 @@ import {
 } from '@patternfly/react-core';
 import { useState } from 'react';
 import * as Yup from 'yup';
-import { useCreateUser, useDeleteUser, useUsers } from '../../../hooks/useUserQueries';
-import type { CreateUserInput } from '../../../types';
+import {
+  useCreateUser,
+  useDeleteUser,
+  useUpdateUser,
+  useUsers,
+} from '../../../hooks/useUserQueries';
+import type { CreateUserInput, UpdateUserInput, UserData } from '../../../types';
 import { FormikForm, FormikSelect, FormikTextInput } from '../../shared';
 import { UserTable } from './UserTable';
 
@@ -36,6 +41,22 @@ const createUserSchema = Yup.object({
     .min(6, 'Password must be at least 6 characters')
     .max(50, 'Password must be at most 50 characters'),
   role: Yup.string().required('Role is required').oneOf(['user', 'admin'], 'Invalid role'),
+  email: Yup.string().email('Invalid email address').optional(),
+  name: Yup.string().max(50, 'Name must be at most 50 characters').optional(),
+});
+
+const editUserSchema = Yup.object({
+  username: Yup.string()
+    .required('Username is required')
+    .min(3, 'Username must be at least 3 characters')
+    .max(20, 'Username must be at most 20 characters'),
+  password: Yup.string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(50, 'Password must be at most 50 characters')
+    .optional(),
+  role: Yup.string().required('Role is required').oneOf(['user', 'admin'], 'Invalid role'),
+  email: Yup.string().email('Invalid email address').optional(),
+  name: Yup.string().max(50, 'Name must be at most 50 characters').optional(),
 });
 
 const deleteUserSchema = Yup.object({
@@ -46,7 +67,9 @@ const deleteUserSchema = Yup.object({
 
 export const UserManagementTab = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState<UserData | null>(null);
   const [userToDelete, setUserToDelete] = useState<{
     id: number;
     username: string;
@@ -57,6 +80,7 @@ export const UserManagementTab = () => {
 
   const { data, isLoading, error } = useUsers({ page, perPage });
   const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
 
   const perPageOptions = [
@@ -66,6 +90,11 @@ export const UserManagementTab = () => {
   ];
 
   const totalItems = data?.total ?? 0;
+
+  const handleEditClick = (user: UserData) => {
+    setUserToEdit(user);
+    setIsEditModalOpen(true);
+  };
 
   const handleDeleteClick = (id: number, username: string, role: string) => {
     // Check if this is the last admin
@@ -117,7 +146,11 @@ export const UserManagementTab = () => {
             </div>
           ) : (
             <>
-              <UserTable users={data?.users ?? []} onDeleteClick={handleDeleteClick} />
+              <UserTable
+                users={data?.users ?? []}
+                onEditClick={handleEditClick}
+                onDeleteClick={handleDeleteClick}
+              />
               {totalItems > 0 && (
                 <Pagination
                   itemCount={totalItems}
@@ -175,6 +208,10 @@ export const UserManagementTab = () => {
               >
                 {undefined}
               </FormikSelect>
+
+              <FormikTextInput name="name" label="Name" type="text" />
+
+              <FormikTextInput name="email" label="Email" type="email" />
             </ModalBody>
             <ModalFooter>
               <ActionGroup>
@@ -189,6 +226,103 @@ export const UserManagementTab = () => {
           </Modal>
         )}
       </FormikForm>
+
+      {userToEdit && (
+        <FormikForm
+          key={userToEdit.id}
+          initialValues={
+            {
+              username: userToEdit.username,
+              password: '',
+              role: userToEdit.role,
+              email: userToEdit.email || '',
+              name: userToEdit.name || '',
+            } as UpdateUserInput & { password: string }
+          }
+          validationSchema={editUserSchema}
+          onSubmit={async (values, { setSubmitting, resetForm }) => {
+            const updateData: UpdateUserInput = {
+              username: values.username,
+              role: values.role,
+              email: values.email || undefined,
+              name: values.name || undefined,
+            };
+
+            if (values.password) {
+              updateData.password = values.password;
+            }
+
+            updateUser.mutate(
+              { id: userToEdit.id, input: updateData },
+              {
+                onSuccess: () => {
+                  setIsEditModalOpen(false);
+                  setUserToEdit(null);
+                  resetForm();
+                },
+                onSettled: () => {
+                  setSubmitting(false);
+                },
+              },
+            );
+          }}
+        >
+          {({ isSubmitting, submitForm }) => (
+            <Modal
+              variant={ModalVariant.small}
+              title="Edit User"
+              isOpen={isEditModalOpen}
+              onClose={() => {
+                setIsEditModalOpen(false);
+                setUserToEdit(null);
+              }}
+            >
+              <ModalBody>
+                <FormikTextInput name="username" label="Username" type="text" isRequired />
+
+                <FormikTextInput
+                  name="password"
+                  label="Password"
+                  type="password"
+                  helperText="Leave blank to keep current password"
+                />
+
+                <FormikSelect
+                  name="role"
+                  label="Role"
+                  isRequired
+                  options={[
+                    { value: 'user', label: 'User' },
+                    { value: 'admin', label: 'Admin' },
+                  ]}
+                >
+                  {undefined}
+                </FormikSelect>
+
+                <FormikTextInput name="name" label="Name" type="text" />
+
+                <FormikTextInput name="email" label="Email" type="email" />
+              </ModalBody>
+              <ModalFooter>
+                <ActionGroup>
+                  <Button variant="primary" onClick={submitForm} isLoading={isSubmitting}>
+                    Save
+                  </Button>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      setIsEditModalOpen(false);
+                      setUserToEdit(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </ActionGroup>
+              </ModalFooter>
+            </Modal>
+          )}
+        </FormikForm>
+      )}
 
       <FormikForm
         initialValues={{ confirmText: '' }}
