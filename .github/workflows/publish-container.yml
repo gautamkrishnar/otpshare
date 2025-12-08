@@ -18,7 +18,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ${{ (matrix.platform == 'linux/arm64' || matrix.platform == 'linux/arm/v7') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
