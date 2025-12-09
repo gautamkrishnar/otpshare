@@ -122,6 +122,23 @@ We welcome contributions! See the **[Contributing Guide](https://github.com/gaut
 
 This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
+## Powered by
+<a href="https://jb.gg/OpenSource" target="_blank">
+  <picture>
+    <source
+    srcset="https://github.com/user-attachments/assets/dd448785-d28d-4f01-9c66-c924ee65ee00"
+    media="(prefers-color-scheme: dark)"
+    alt="Jetbrains Logo"
+    width="300px"
+    />
+    <img
+    src="https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg"
+    alt="Jetbrains Logo"
+    width="300px"
+    />
+  </picture>
+</a>
+
 ## Support & Community
 
 - 🐛 **Report Issues**: [GitHub Issues](https://github.com/gautamkrishnar/otpshare/issues/new?labels=bug)
