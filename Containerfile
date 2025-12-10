@@ -29,7 +29,7 @@ COPY packages/frontend/package.json ./packages/frontend/package.json
 # Skip building native modules here - we only need them for the JS build
 # Native modules will be properly built in the prod-deps stage
 # Use 6GB of available 7GB on GitHub runners (leave 1GB for system)
-RUN NODE_OPTIONS="--max-old-space-size=6144" yarn install --immutable --mode=skip-build
+RUN NODE_OPTIONS="--max-old-space-size=5144" yarn install --immutable --mode=skip-build
 
 # 3. Copy source code
 COPY packages ./packages
@@ -67,7 +67,7 @@ COPY --from=builder /app/packages/backend/package.json ./packages/backend/packag
 # This generates a clean node_modules with bcrypt/sqlite3 binaries compatible with Debian
 # Use 6GB of available 7GB on GitHub runners (leave 1GB for system)
 WORKDIR /app/packages/backend
-RUN NODE_OPTIONS="--max-old-space-size=6144" yarn workspaces focus --production
+RUN NODE_OPTIONS="--max-old-space-size=5144" yarn workspaces focus --production
 
 # ==========================================
 # Stage 4: Production Runner (Distroless)
