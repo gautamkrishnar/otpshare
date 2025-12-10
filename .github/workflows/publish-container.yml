@@ -18,7 +18,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ${{ (matrix.platform == 'linux/arm64' || matrix.platform == 'linux/arm/v7') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
@@ -27,7 +27,6 @@ jobs:
       matrix:
         platform:
           - linux/amd64
-          - linux/arm/v7
           - linux/arm64
           - linux/s390x
           - linux/ppc64le
